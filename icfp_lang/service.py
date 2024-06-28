@@ -5,7 +5,7 @@ from icfp_lang import language
 competition_server = 'https://boundvariable.space/communicate'
 
 def message(msg: str) -> language.Program:
-    return send(language.Program(language.String(msg)))
+    return send(language.Program(language.Value(msg)))
 
 
 def send(program: language.Program) -> language.Program:
