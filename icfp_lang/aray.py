@@ -106,18 +106,18 @@ def request(s, force=False):
 #         result = request(msg)
 #         print(result['decoded'])
 
-# %% get 3d info
-result = request('get 3d', force=True)
-with open('../problems/3d/info.txt', 'w') as file:
-    file.write(result['decoded'])
-# %% get 3d levels
-for i in range(1, 13):
-    path = f"../problems/3d/level{i}.txt"
-    if not os.path.exists(path):
-        msg = f"get 3d{i}"
-        result = request(msg)
-        with open(path, 'w') as file:
-            file.write(result['decoded'])
+# # %% get 3d info
+# result = request('get 3d', force=True)
+# with open('../problems/3d/info.txt', 'w') as file:
+#     file.write(result['decoded'])
+# # %% get 3d levels
+# for i in range(1, 13):
+#     path = f"../problems/3d/level{i}.txt"
+#     if not os.path.exists(path):
+#         msg = f"get 3d{i}"
+#         result = request(msg)
+#         with open(path, 'w') as file:
+#             file.write(result['decoded'])
 
 # # %% echo
 # done = False
@@ -127,3 +127,9 @@ for i in range(1, 13):
 #     if "You scored some points" not in result['decoded']:
 #         done = True
 #     time.sleep(5)
+
+
+# %% get language_test info
+result = request('get language_test')
+with open('../problems/language_test/info.txt', 'w') as file:
+    file.write(result['decoded'])
