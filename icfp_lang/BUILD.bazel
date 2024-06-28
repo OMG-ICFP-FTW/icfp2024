@@ -10,3 +10,12 @@ py_library(
     ],
     data = ["//misc:SUBMISSION_HEADER.txt"],
 )
+
+py_binary(
+    name = "mooc_terminal",
+    main = "terminal.py",
+    srcs = ["terminal.py"],
+    deps = [
+        ":icfp_py",
+    ]
+)

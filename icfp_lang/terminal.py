@@ -6,3 +6,7 @@ def start():
         print(language.human_readable(service.message(command)))
         command = input("> ")
     print("Goodbye!")
+
+
+if __name__ == '__main__':
+    start()
