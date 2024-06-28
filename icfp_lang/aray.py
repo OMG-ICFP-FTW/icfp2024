@@ -163,8 +163,12 @@ def request(s, force=False):
 request('get index')
 
 
-# %%
+# %%  Get lambdaman info and send solutions
 lm_cache_path = '../lambdaman/'
+os.makedirs(lm_cache_path, exist_ok=True)
+result = request('get lambdaman')
+with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
+    file.write(result['decoded'])
 for i in range(1, 6):
     path = f'../lambdaman/solution{i}.txt'
     if os.path.exists(path):
@@ -172,4 +176,4 @@ for i in range(1, 6):
             solution = file.read().strip()
     msg = f"solve lambdaman{i} {solution}"
     result = request(msg)
-    print(result['decoded'])
+    print(result['decoded'])  

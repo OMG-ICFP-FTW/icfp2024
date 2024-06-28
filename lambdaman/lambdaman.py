@@ -159,7 +159,6 @@ class Level:
             with open(path) as f:
                 prev_score = len(f.read().strip())
             if self.score >= prev_score:
-                print(f"No improvement, skipping {self.i}")
                 return
         with open(path, 'w') as f:
             f.write(self.solution)
@@ -167,6 +166,7 @@ class Level:
 
 
 # %% run the levels
-for i in range(1, 6):
-    level = Level.load(i)
-    level.solve().save()
+while True:
+    for i in range(3, 6):
+        level = Level.load(i)
+        level.solve().save()
