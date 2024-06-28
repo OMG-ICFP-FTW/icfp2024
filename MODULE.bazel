@@ -27,3 +27,37 @@ pip.parse(
     requirements_lock = "//:requirements_lock_3_12.txt",
 )
 use_repo(pip, "pip")
+
+################################################################################
+# Rust #########################################################################
+################################################################################
+
+bazel_dep(name = "bazel_skylib", version = "1.7.1")
+bazel_dep(name = "rules_rust", version = "0.46.0")
+
+rust = use_extension("@rules_rust//rust:extensions.bzl", "rust")
+rust.toolchain(
+    edition = "2021",
+    versions=["1.78.0"],
+)
+use_repo(rust, "rust_toolchains")
+
+register_toolchains("@rust_toolchains//:all")
+
+crate_index = use_extension("@rules_rust//crate_universe:extension.bzl", "crate")
+crate_index.spec(package = "anyhow", version = "1")
+crate_index.spec(package = "base64", version = "0.13.1")
+crate_index.spec(package = "bytes", version = "1.6.0")
+crate_index.spec(package = "clap", version = "4.3.19", features = ["derive"])
+crate_index.spec(package = "lazy_static", version = "1.4")
+crate_index.spec(package = "log", version = "0.4" )
+crate_index.spec(package = "maplit", version = "1.0.2")
+crate_index.spec(package = "quickcheck", version = "1.0.3")
+crate_index.spec(package = "regex", version = "1.5")
+crate_index.spec(package = "serde", version = "1.0", features = ["derive"])
+crate_index.spec(package = "serde_json", version = "1.0")
+crate_index.spec(package = "simplelog", version = "0.12.0")
+crate_index.spec(package = "thiserror", version = "1.0")
+
+crate_index.from_specs(name = "crate_index")
+use_repo(crate_index, "crate_index")

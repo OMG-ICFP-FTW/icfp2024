@@ -1,0 +1,7 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
+
+rust_binary(
+    name = "rust_example",
+    srcs = ["src/bin/rust_example.rs"],
+    deps = [],
+)
