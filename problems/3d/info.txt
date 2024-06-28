@@ -203,10 +203,10 @@ When running this for `A = 3` and `B = 4`, this program has a spacetime volume o
 The following problems are available:
 
 * [3d1] Best score: 7000.
-* [3d2] Best score: 3000.
-* [3d3] Best score: 2628.
-* [3d4] Best score: 3744.
-* [3d5] Best score: 4560.
+* [3d2] Best score: 2700.
+* [3d3] Best score: 1820.
+* [3d4] Best score: 2860.
+* [3d5] Best score: 3456.
 * [3d6] Best score: 3840.
 * [3d7]
 * [3d8]

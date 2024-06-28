@@ -62,60 +62,68 @@ def request(s, force=False):
     with open(filepath, 'r') as file:
         return json.load(file)
 
-# %% Get index
-result = request('get index', force=True)
-with open('../index/index.txt', 'w') as file:
-    file.write(result['decoded'])
+# # %% Get index
+# result = request('get index', force=True)
+# with open('../problems/index/index.txt', 'w') as file:
+#     file.write(result['decoded'])
 
-# %%  Get lambdaman info and send solutions
-lm_cache_path = '../lambdaman/'
-os.makedirs(lm_cache_path, exist_ok=True)
-result = request('get lambdaman', force=True)
-with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
-    file.write(result['decoded'])
-for i in range(1, 6):
-    path = f'../lambdaman/solution{i}.txt'
-    if os.path.exists(path):
-        with open(path, 'r') as file:
-            solution = file.read().strip()
-    msg = f"solve lambdaman{i} {solution}"
-    result = request(msg)
-    print(result['decoded'])
+# # %%  Get lambdaman info and send solutions
+# lm_cache_path = '../problems/lambdaman/'
+# os.makedirs(lm_cache_path, exist_ok=True)
+# result = request('get lambdaman', force=True)
+# with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
+#     file.write(result['decoded'])
+# for i in range(1, 6):
+#     path = f'../problems/lambdaman/solution{i}.txt'
+#     if os.path.exists(path):
+#         with open(path, 'r') as file:
+#             solution = file.read().strip()
+#     msg = f"solve lambdaman{i} {solution}"
+#     result = request(msg)
+#     print(result['decoded'])
 
-# %% Get spaceship info
-ss_cache_path = '../spaceship/'
-os.makedirs(ss_cache_path, exist_ok=True)
-result = request('get spaceship', force=True)
-with open(os.path.join(ss_cache_path, 'info.txt'), 'w') as file:
-    file.write(result['decoded'])
-# %% Download spaceship levels
-for i in range(1, 22):
-    path = f'../spaceship/level{i}.txt'
-    if not os.path.exists(path):
-        msg = f"get spaceship{i}"
-        result = request(msg)
-        with open(path, 'w') as file:
-            file.write(result['decoded'])
-# %% Upload spaceship solutions
-for i in range(1, 22):
-    path = f'../spaceship/solution{i}.txt'
-    if os.path.exists(path):
-        with open(path, 'r') as file:
-            solution = file.read().strip()
-        msg = f"solve spaceship{i} {solution}"
-        result = request(msg)
-        print(result['decoded'])
+# # %% Get spaceship info
+# ss_cache_path = '../problems/spaceship/'
+# os.makedirs(ss_cache_path, exist_ok=True)
+# result = request('get spaceship', force=True)
+# with open(os.path.join(ss_cache_path, 'info.txt'), 'w') as file:
+#     file.write(result['decoded'])
+# # %% Download spaceship levels
+# for i in range(1, 22):
+#     path = f'../problems/spaceship/level{i}.txt'
+#     if not os.path.exists(path):
+#         msg = f"get spaceship{i}"
+#         result = request(msg)
+#         with open(path, 'w') as file:
+#             file.write(result['decoded'])
+# # %% Upload spaceship solutions
+# for i in range(1, 22):
+#     path = f'../problems/spaceship/solution{i}.txt'
+#     if os.path.exists(path):
+#         with open(path, 'r') as file:
+#             solution = file.read().strip()
+#         msg = f"solve spaceship{i} {solution}"
+#         result = request(msg)
+#         print(result['decoded'])
 
 # %% get 3d info
 result = request('get 3d', force=True)
-with open('../3d/info.txt', 'w') as file:
+with open('../problems/3d/info.txt', 'w') as file:
     file.write(result['decoded'])
+# %% get 3d levels
+for i in range(1, 13):
+    path = f"../problems/3d/level{i}.txt"
+    if not os.path.exists(path):
+        msg = f"get 3d{i}"
+        result = request(msg)
+        with open(path, 'w') as file:
+            file.write(result['decoded'])
 
-# %% echo
-done = False
-while not done:
-    result = request(f'echo {hash(random.randbytes(1024))}', force=True)
-    print(result['decoded'])
-    if "You scored some points" not in result['decoded']:
-        done = True
-    time.sleep(5)
+# # %% echo
+# done = False
+# while not done:
+#     result = request(f'echo {hash(random.randbytes(1024))}', force=True)
+#     print(result['decoded'])
+#     if "You scored some points" not in result['decoded']:
+#         done = True
+#     time.sleep(5)
