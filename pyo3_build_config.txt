@@ -1,0 +1,4 @@
+implementation=CPython
+version=3.12
+shared=true
+abi3=true

@@ -1,0 +1,41 @@
+load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_shared_library", "rust_test")
+
+package(default_visibility = ["//visibility:public"])
+
+rust_shared_library(
+    name = "rust_parser",
+    srcs = ["src/lib.rs"],
+    crate_name = "rust_parser",
+    deps = [
+        "@crate_index//:anyhow",
+        "@crate_index//:pyo3",
+    ],
+    # rustc_flags = ["-Clink-arg=-undefined", "-Clink-arg=dynamic-lookup"]
+)
+
+genrule(
+    name = "rust_parser_so",
+    srcs = [":rust_parser"],
+    outs = ["rust_parser.so"],
+    cmd = "cp $< $@",
+)
+
+py_library(
+    name = "rust_parser_py",
+    srcs = ["trampoline.py"],
+    data = ["rust_parser.so"],
+    imports = ["."],
+    deps = [
+        ":rust_parser",
+    ],
+)
+
+py_binary(
+    name = "test_call",
+    srcs = ["trampoline.py"],
+    main = "trampoline.py",
+    data = ["rust_parser.so"],
+    deps = [
+        ":rust_parser_py",
+    ],
+)

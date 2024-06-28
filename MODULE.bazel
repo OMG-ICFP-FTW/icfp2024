@@ -52,8 +52,19 @@ crate_index.spec(package = "clap", version = "4.3.19", features = ["derive"])
 crate_index.spec(package = "lazy_static", version = "1.4")
 crate_index.spec(package = "log", version = "0.4" )
 crate_index.spec(package = "maplit", version = "1.0.2")
+crate_index.spec(package = "pest", version = "2.7")
 crate_index.spec(package = "quickcheck", version = "1.0.3")
 crate_index.spec(package = "regex", version = "1.5")
+crate_index.spec(package = "pyo3", version = "0.22.0", features = ["extension-module"])
+crate_index.spec(package = "pyo3-build-config", version = "0.22.0")
+# crate_index.annotation(
+#     crate = "pyo3-build-config",
+#     build_script_data = ["@@//pyo3_build_config.txt"],
+#     build_script_env = {
+#         "PYO3_NO_PYTHON": "1",
+#         "PYO3_CONFIG_FILE": "$(execpath @@//pyo3_build_config.txt)",
+#     },
+# )
 crate_index.spec(package = "serde", version = "1.0", features = ["derive"])
 crate_index.spec(package = "serde_json", version = "1.0")
 crate_index.spec(package = "simplelog", version = "0.12.0")

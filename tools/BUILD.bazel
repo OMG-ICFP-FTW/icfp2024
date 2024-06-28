@@ -9,6 +9,7 @@ py_console_script_binary(
     script = "ipython",
     deps = [
         "//icfp_lang:icfp_py",
+        "//rust_parser:rust_parser_py",
     ] + [
         requirement('requests'),
     ],

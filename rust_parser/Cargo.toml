@@ -1,0 +1,14 @@
+[package]
+name = "rust-parser"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+name = "rust_parser"
+crate-type = ["cdylib"]
+
+[dependencies]
+anyhow = { workspace = true }
+pest = { workspace = true }
+pyo3 = { workspace = true }
+

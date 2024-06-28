@@ -2,7 +2,10 @@
 
 members = [
     "rust_example",
+    "rust_parser",
 ]
+
+resolver = "2"
 
 [workspace.dependencies]
 anyhow = "1.0"
@@ -12,9 +15,11 @@ clap = { version = "4.3.19", features = ["derive"]}
 lazy_static= "1.4"
 log = "0.4"
 maplit = "1.0.2"
+pest = "2.7.10"
+pyo3 = { version = "0.22.0", features = ["extension-module"]}
 quickcheck = "1.0.3"
 regex = "1.5"
-serde = { version = "1.0", features = ["derive"])
+serde = { version = "1.0", features = ["derive"]}
 serde_json = "1.0"
 simplelog = "0.12.0"
 thiserror = "1.0"
