@@ -6,6 +6,7 @@ py_library(
     name = "icfp_py",
     srcs = glob(["*.py"]),
     deps = [
-        requirement('requests'),
+        requirement("requests"),
     ],
+    data = ["//misc:SUBMISSION_HEADER.txt"],
 )
