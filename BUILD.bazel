@@ -1,0 +1,8 @@
+load("@python_3_12//:defs.bzl", compile_pip_requirements_3_12 = "compile_pip_requirements")
+
+compile_pip_requirements_3_12(
+    name = "pip_requirements_3_12",
+    extra_args = ["--allow-unsafe"],
+    requirements_in = "requirements.txt",
+    requirements_txt = "requirements_lock_3_12.txt",
+)

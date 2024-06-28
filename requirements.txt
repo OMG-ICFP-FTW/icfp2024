@@ -1,0 +1,4 @@
+# To update Bazel projection of PyPI, run:
+#   bazel run //:pip_requirements_3_12.update
+ipython==8.26.0; python_version >= "3.10"
+
