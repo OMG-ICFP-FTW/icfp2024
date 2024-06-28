@@ -88,3 +88,20 @@ os.makedirs(ss_cache_path, exist_ok=True)
 result = request('get spaceship', force=True)
 with open(os.path.join(ss_cache_path, 'info.txt'), 'w') as file:
     file.write(result['decoded'])
+# %% Download spaceship levels
+for i in range(1, 22):
+    path = f'../spaceship/level{i}.txt'
+    if not os.path.exists(path):
+        msg = f"get spaceship{i}"
+        result = request(msg)
+        with open(path, 'w') as file:
+            file.write(result['decoded'])
+# %% Upload spaceship solutions
+for i in range(1, 22):
+    path = f'../spaceship/solution{i}.txt'
+    if os.path.exists(path):
+        with open(path, 'r') as file:
+            solution = file.read().strip()
+        msg = f"solve spaceship{i} {solution}"
+        result = request(msg)
+        print(result['decoded'])
