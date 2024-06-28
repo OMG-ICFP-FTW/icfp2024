@@ -167,3 +167,6 @@ cython_debug/
 
 # pyenv stuff
 .python-version
+
+# some temp cache
+cache/
