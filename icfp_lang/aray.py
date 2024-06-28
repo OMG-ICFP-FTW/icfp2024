@@ -114,7 +114,7 @@ with open('../3d/info.txt', 'w') as file:
 # %% echo
 done = False
 while not done:
-    result = request('echo a', force=True)
+    result = request(f'echo {hash(random.randbytes(1024))}', force=True)
     print(result['decoded'])
     if "You scored some points" not in result['decoded']:
         done = True
