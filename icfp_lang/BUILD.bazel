@@ -1,0 +1,7 @@
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "icfp_py",
+    srcs = ["strings.py"],
+    deps = [],
+)
