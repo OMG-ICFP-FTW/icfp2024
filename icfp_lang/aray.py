@@ -371,3 +371,12 @@ for i in range(1, 6):
     print("Solution", level.solution)
     response = request(f"solve lambdaman{i} " + level.solution)
     print(response['decoded'])
+
+
+# %%
+lm_cache_path = '../lambdaman/'
+os.makedirs(lm_cache_path, exist_ok=True)
+for i in range(1, 6):
+    level = LambdaMan.get(i)
+    with open(os.path.join(lm_cache_path, f"level{i}.txt"), 'w') as file:
+        file.write(str(level))
