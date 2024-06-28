@@ -110,3 +110,12 @@ for i in range(1, 22):
 result = request('get 3d', force=True)
 with open('../3d/info.txt', 'w') as file:
     file.write(result['decoded'])
+
+# %% echo
+done = False
+while not done:
+    result = request('echo a', force=True)
+    print(result['decoded'])
+    if "You scored some points" not in result['decoded']:
+        done = True
+    time.sleep(5)
