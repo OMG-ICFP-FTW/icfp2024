@@ -105,3 +105,8 @@ for i in range(1, 22):
         msg = f"solve spaceship{i} {solution}"
         result = request(msg)
         print(result['decoded'])
+
+# %% get 3d info
+result = request('get 3d', force=True)
+with open('../3d/info.txt', 'w') as file:
+    file.write(result['decoded'])
