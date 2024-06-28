@@ -5,12 +5,42 @@ from dataclasses import dataclass
 from icfp_lang import strings
 
 
+class String:
+    @staticmethod
+    def parse(source: str) -> 'Value':
+        return Value(strings.decode(source))
+
+
+class Integer:
+    @staticmethod
+    def parse(source: str) -> 'Value':
+        raise NotImplemented('Base94 integer parsing is not yet implemented')
+
+
+class Boolean:
+    @staticmethod
+    def parse(source: str) -> 'Value':
+        return Value(source == 'T')
+
+value_parse_lookup = {
+    'S': String,
+    'I': Integer,
+    'T': Boolean,
+    'F': Boolean,
+}
+
 @dataclass
 class Value:
     val: Union[int, bool, str]
 
+    @staticmethod
+    def parse(source: str) -> 'Value':
+        value_parse_lookup[source[0]](source)
+
+
 class UnaryOp:
     pass
+
 
 class Neg(UnaryOp):
     symbol = '-'
@@ -99,10 +129,19 @@ class Binary:
 
 Expr = Union[Value, Unary, Binary]
 
+prefixes = {
+    'S': String,
+    'B': Boolean,
+}
+
 @dataclass
 class Program:
     """A program in Interstellar Communication Functional Program (ICFP)"""
     expr: Expr
+
+    @staticmethod
+    def parse(source: str) -> 'Program':
+        pass
 
 
 def encode(pgm: Program) -> str:
