@@ -11,4 +11,3 @@ translation_table = str.maketrans(
 
 def decode(inpt: str) -> str:
     return inpt[1:].translate(translation_table)
-
