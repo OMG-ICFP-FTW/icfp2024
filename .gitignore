@@ -170,3 +170,8 @@ cython_debug/
 
 # some temp cache
 cache/
+
+
+# vscode
+.vscode/
+.bash_history
