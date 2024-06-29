@@ -1,10 +1,16 @@
-use serde::{Serialize, Deserialize};
+use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum Value {
     Str(String),
     Bool(bool),
     Int(i64),
+}
+
+impl Value {
+    pub fn decode(encoded: &str) -> Value {
+        todo!("Decode string: {}", encoded)
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -40,7 +46,7 @@ pub enum BinaryOp {
 }
 
 impl BinaryOp {
-    fn as_str(&self) -> &'static str {
+    pub fn as_str(&self) -> &'static str {
         match self {
             BinaryOp::Add => "+",
             BinaryOp::Sub => "-",
@@ -59,7 +65,7 @@ impl BinaryOp {
         }
     }
 
-    fn from_str(source: &str) -> BinaryOp {
+    pub fn from_str(source: &str) -> BinaryOp {
         match source {
             "+" => BinaryOp::Add,
             "-" => BinaryOp::Sub,
@@ -78,13 +84,33 @@ impl BinaryOp {
             _ => unimplemented!(),
         }
     }
+
+    pub fn from_name(name: &str) -> BinaryOp {
+        match name {
+            "add" => BinaryOp::Add,
+            "sub" => BinaryOp::Sub,
+            "mult" => BinaryOp::Mult,
+            "div" => BinaryOp::Div,
+            "mod" => BinaryOp::Mod,
+            "lt" => BinaryOp::Lt,
+            "gt" => BinaryOp::Gt,
+            "eq" => BinaryOp::Eq,
+            "or" => BinaryOp::Or,
+            "and" => BinaryOp::And,
+            "cat" => BinaryOp::Cat,
+            "take" => BinaryOp::Take,
+            "drop" => BinaryOp::Drop,
+            "apply" => BinaryOp::Apply,
+            _ => unimplemented!(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct Binary {
     pub op: BinaryOp,
-    pub first: Value,
-    pub second: Value,
+    pub first: Box<Expr>,
+    pub second: Box<Expr>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
