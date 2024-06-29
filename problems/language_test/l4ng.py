@@ -100,52 +100,32 @@ Unknown operators
 The above set of language constructs are all that researchers have discovered, and it is conjectured that the Cult will never use anything else in their communication towards Earth. However, it is unknown whether more language constructs exist.
 '''
 
-import math
 
-def truncdiv(a, b):
-    return math.trunc(a / b)
+r'''
+A Brief Explanation of Capture-Avoiding Substitution
+25 May 2019 - 513 words - 2 minute read - RSS
 
-def truncmod(a, b):
-    return a - b * truncdiv(a, b)
+During evaluation of lambda calculus, we often need to perform substitutions of variables or expressions. To evaluate the application (λx.e1) e2 (where e1 and e2 are arbitrary expressions) we would need to replace occurrences of x inside e1 with e2 (notation: e1 {e2\x}). Normally substitutions are applied recursively, but since the expressions involved in the substitution might share variable names, the meaning of the resulting expression might change if we are not careful.
 
-test_path = 'language_test.txt'
-with open(test_path, 'r') as file:
-    language_test = file.read()
+For example, suppose we were to evaluate (λx.λy.x y) y. If we were to directly substitute y for x in λy.x y, we would get λy.y y. This changes the meaning of the expression, because the y which we wanted to substitute was originally a free variable; it is not the same y that is bound as an argument to the lambda. In our resulting incorrect expression, the y we substituted became bound, or captured under the lambda - we want to avoid this by doing something called capture-avoiding substitution.
 
+To perform capture-avoiding substitution on λv1.e1 {e2\v2} (where v1 and v2 are arbitrary variables), there are two things we need to check to make sure the variable names do not conflict.
 
-def c2b94(s):
-    value = 0
-    for c in s:
-        value *= 94
-        value += ord(c) - 33
-    return value
+    We need to make sure that v1 and v2 are not the same variable name. If they are, then we need to rename v1 to something else. This is because performing a simple substitution would also replace variables bound under the abstraction for v1 with e2, which would be incorrect.
+    We need to make sure that v1 is not in the free variables of of e2. If it is, then we need to rename v1 to something else. This is because performing a simple substitution would cause occurrences of v1 inside e2 to become bound (as in the example earlier).
 
+Once we have made sure there are no conflicts, we can continue applying the substitution recursively (λv1.(e1 {e2\v2})).
 
-def b942c(value):
-    s = ""
-    while value:
-        value, r = divmod(value, 94)
-        s = chr(r + 33) + s
-    return s
+To correctly perform substitution for the earlier example, we would rename the y in λy.x y to something else that does not conflict (like z), then perform the substitution.
 
-assert c2b94("/6") == 1337
-assert b942c(1337) == "/6"
+(λx.λy.x y) y -> λy.x y {y\x} -> λz.x z {y\x} -> λz.(x z {y\x}) -> λz.y z
 
+To define things more formally, the complete rules for substitution would be as follows:
 
-str_reference = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`|~ \n"
-decode_map = {chr(k): v for (k, v) in zip(list(range(33,33 + len(str_reference))),str_reference)}
-encode_map = {v: k for (k, v) in decode_map.items()}
-decode_trans = str.maketrans(decode_map)
-encode_trans = str.maketrans(encode_map)
-
-
-def decode(s):
-    assert isinstance(s, str), f"Expected string, got {type(s)}"
-    return s.translate(decode_trans)
-
-def encode(s):
-    assert isinstance(s, str), f"Expected string, got {type(s)}"
-    return s.translate(encode_trans)
+    v1 {e\v2} -> e if v1 == v2, otherwise v1
+    e1 e2 {e3\v} -> (e1 {e3\v}) (e2 {e3\v})
+    λv1.e1 {e2\v2} -> λv1.(e1 {e2\v2}) where v1 != v2 and v1 is not in the free variables of e2.
+'''
 
 
 def tokenize(s):
@@ -154,35 +134,26 @@ def tokenize(s):
     return s.strip().split()
 
 
+def untokenize(tokens):
+    assert isinstance(tokens, list), f"Expected list, got {type(tokens)}"
+    assert len(tokens) > 0, f"Expected non-empty list, got {tokens}"
+    assert all(isinstance(t, str) for t in tokens), f"Expected list of str, got {tokens}"
+    return " ".join(tokens)
+
+
 def parse(tokens):
     assert isinstance(tokens, list), f"Expected list, got {type(tokens)}"
     assert len(tokens) > 0, f"Expected non-empty list, got {tokens}"
     token, *remainder = tokens
     indicator, body = token[0], token[1:]
-    if indicator in ["T", "F"]:
-        assert not body, f"Expected empty body, got {body}"
-        return token, remainder
     if indicator == "I":
         assert body, f"Expected non-empty body, got {body}"
         return token, remainder
-    if indicator == "S":
-        assert body, f"Expected non-empty body, got {body}"
-        return token, remainder
-    if indicator == "U":
-        assert body in ("-", "!", "#", "$"), f"Expected -/!/#/$, got {body}"
-        value, remainder = parse(remainder)
-        return (token, value), remainder
     if indicator == "B":
-        assert body in ("+", "-", "*", "/", "%", "<", ">", "=", "|", "&", ".", "T", "D", "$"), f"Expected +,-,*,/,%,<,>,=,|,&,.,T,D,$, got {body}"
+        assert body == '$', f"Expected body $, got {body}"
         value1, remainder = parse(remainder)
         value2, remainder = parse(remainder)
         return (token, value1, value2), remainder
-    if indicator == "?":
-        assert not body, f"Expected empty body, got {body}"
-        value1, remainder = parse(remainder)
-        value2, remainder = parse(remainder)
-        value3, remainder = parse(remainder)
-        return (token, value1, value2, value3), remainder
     if indicator == "L":
         assert body, f"Expected non-empty body, got {body}"
         value, remainder = parse(remainder)
@@ -193,31 +164,28 @@ def parse(tokens):
     raise ValueError(f"Unknown indicator {indicator}")
 
 
-assert parse(tokenize("T")) == ("T", [])
-assert parse(tokenize("F")) == ("F", [])
-assert parse(tokenize("I/6")) == ("I/6", [])
-assert parse(tokenize("SB%,,/}Q/2,$_")) == ("SB%,,/}Q/2,$_", [])
-assert parse(tokenize("U- I$")) == (("U-", "I$"), [])
-assert parse(tokenize("U! T")) == (("U!", "T"), [])
-assert parse(tokenize("U# S4%34")) == (("U#", "S4%34"), [])
-assert parse(tokenize("U$ I4%34")) == (("U$", "I4%34"), [])
-assert parse(tokenize("B+ I# I$")) == (("B+", "I#", "I$"), [])
-assert parse(tokenize("B- I$ I#")) == (("B-", "I$", "I#"), [])
-assert parse(tokenize("B* I$ I#")) == (("B*", "I$", "I#"), [])
-assert parse(tokenize("B/ U- I( I#")) == (("B/", ("U-", "I("), "I#"), [])
-assert parse(tokenize("B% U- I( I#")) == (("B%", ("U-", "I("), "I#"), [])
-assert parse(tokenize("B< I$ I#")) == (("B<", "I$", "I#"), [])
-assert parse(tokenize("B> I$ I#")) == (("B>", "I$", "I#"), [])
-assert parse(tokenize("B= I$ I#")) == (("B=", "I$", "I#"), [])
-assert parse(tokenize("B| T F")) == (("B|", "T", "F"), [])
-assert parse(tokenize("B& T F")) == (("B&", "T", "F"), [])
-assert parse(tokenize("B. S4% S34")) == (("B.", "S4%", "S34"), [])
-assert parse(tokenize("BT I$ S4%34")) == (("BT", "I$", "S4%34"), [])
-assert parse(tokenize("BD I$ S4%34")) == (("BD", "I$", "S4%34"), [])
-# assert parse(tokenize("B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK")) == (("B$", ("B$", ("L#", ("L$", "v#")), ("B.", "SB%,,/", "S}Q/2,$_")), "IK"), [])
+def unparse(parsed, remainder=None):
+    remainder = [] if remainder is None else remainder
+    assert isinstance(remainder, list), f"Expected list, got {type(remainder)}"
+    if isinstance(parsed, str):
+        assert parsed, f"Expected non-empty str, got {parsed}"
+        return [parsed] + remainder
+    if isinstance(parsed, tuple):
+        assert len(parsed) > 0, f"Expected non-empty tuple, got {parsed}"
+        if len(parsed) == 1:
+            return unparse(parsed[0], remainder)
+        return unparse(parsed[0], unparse(parsed[1:], remainder))
+    raise ValueError(f"Unknown parsed type {parsed}")
 
 
-# parse(tokenize("""B$ B$ L" B$ L# B$ v" B$ v# v# L# B$ v" B$ v# v# L" L# ? B= v# I! I" B$ L$ B+ B$ v" v$ B$ v" v$ B- v# I" I%"""))
+s = "B$ Lx vx I1"
+s = "B$ Lx B$ Ly vx I1 I2"
+untokenize(unparse(*parse(tokenize(s))))
+
+
+
+# %%
+
 
 
 def replace(expression, variable, replacement):
