@@ -1,0 +1,27 @@
+load("@pip//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+py_library(
+    name = "threedlang",
+    srcs = [
+        "threedlang.py",
+    ],
+    deps = [
+        requirement('numpy'),
+        requirement('tabulate'),
+    ],
+)
+
+py_binary(
+    name = "solve3d",
+    main = "solve3d.py",
+    data = [
+        "//problems:3d",
+        "test.txt",
+    ],
+    srcs = ["solve3d.py"],
+    deps = [
+        ":threedlang",
+    ]
+)
