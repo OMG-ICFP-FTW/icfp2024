@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub enum Value {
     Str(String),
     Bool(bool),
@@ -16,6 +16,7 @@ impl Value {
         let decode_translation_table: HashMap<char, char> = TARGET
             .chars()
             .zip((33..(33 + TARGET.len() as u32)).map(|c| c as u8 as char))
+            .map(|(k, v)| (v, k))
             .collect();
         Value::Str(
             encoded
@@ -60,7 +61,9 @@ mod decode_test {
     use super::*;
 
     #[test]
-    fn string() {}
+    fn string() {
+        assert_eq!(Value::Str("get index".to_string()), Value::decode_string("'%4}).$%8"));
+    }
 
     #[test]
     fn integer() {
