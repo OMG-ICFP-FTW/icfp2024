@@ -9,10 +9,11 @@ rust_library(
     deps = [
         "@crate_index//:anyhow",
         "@crate_index//:clap",
+        "@crate_index//:lazy_static",
         "@crate_index//:pest",
-        "@crate_index//:thiserror",
         "@crate_index//:serde",
         "@crate_index//:serde_json",
+        "@crate_index//:thiserror",
     ],
     proc_macro_deps = [
         "@crate_index//:pest_derive",

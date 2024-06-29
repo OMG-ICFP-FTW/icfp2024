@@ -1,3 +1,4 @@
+use lazy_static::lazy_static;
 use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
@@ -12,16 +13,17 @@ pub enum Value {
 static TARGET: &'static str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`|~ \n";
 impl Value {
     pub fn decode_string(encoded: &str) -> Value {
-        // TODO(alex): wrap in lazy_static
-        let decode_translation_table: HashMap<char, char> = TARGET
-            .chars()
-            .zip((33..(33 + TARGET.len() as u32)).map(|c| c as u8 as char))
-            .map(|(k, v)| (v, k))
-            .collect();
+        lazy_static! {
+            static ref DECODE_TRANSLATION_TABLE: HashMap<char, char> = TARGET
+                .chars()
+                .zip((33..(33 + TARGET.len() as u32)).map(|c| c as u8 as char))
+                .map(|(k, v)| (v, k))
+                .collect();
+        }
         Value::Str(
             encoded
                 .chars()
-                .map(|c| *decode_translation_table.get(&c).unwrap_or(&c))
+                .map(|c| *DECODE_TRANSLATION_TABLE.get(&c).unwrap_or(&c))
                 .collect(),
         )
     }
@@ -31,20 +33,24 @@ impl Value {
     }
 
     pub fn decode_integer_body(encoded: &str) -> i64 {
-        // TODO(alex): wrap in lazy_static
-        // Define the base 94 characters
-        let base94_chars: Vec<char> = (33..127).map(|c| c as u8 as char).collect();
-        // Create a reverse lookup map from characters to their indices (values)
-        let char_to_value: std::collections::HashMap<char, i64> = base94_chars
-            .iter()
-            .enumerate()
-            .map(|(idx, &ch)| (ch, idx as i64))
-            .collect();
+        lazy_static! {
+            static ref CHAR_TO_VALUE: std::collections::HashMap<char, i64> = {
+                // Define the base 94 characters
+                let base94_chars: Vec<char> = (33..127).map(|c| c as u8 as char).collect();
+                // Create a reverse lookup map from characters to their indices (values)
+                let char_to_value: std::collections::HashMap<char, i64> = base94_chars
+                    .iter()
+                    .enumerate()
+                    .map(|(idx, &ch)| (ch, idx as i64))
+                    .collect();
+                char_to_value
+            };
+        }
 
         let mut result = 0_i64;
         let mut power = 1_i64;
         for ch in encoded.chars().rev() {
-            if let Some(&value) = char_to_value.get(&ch) {
+            if let Some(&value) = CHAR_TO_VALUE.get(&ch) {
                 result += value * power;
                 power *= 94;
             } else {
@@ -62,7 +68,10 @@ mod decode_test {
 
     #[test]
     fn string() {
-        assert_eq!(Value::Str("get index".to_string()), Value::decode_string("'%4}).$%8"));
+        assert_eq!(
+            Value::Str("get index".to_string()),
+            Value::decode_string("'%4}).$%8")
+        );
     }
 
     #[test]
