@@ -1,17 +1,29 @@
 use std::fs;
 use std::path;
 
+use std::collections::HashMap;
+
 use clap::Parser;
 
-use rust_parser::*;
+use rust_parser::ast::*;
 
 #[derive(clap::Parser, Debug)]
 #[command(author, version, about, long_about = None, arg_required_else_help = true)]
 struct Args {
+    #[command(subcommand)]
+    command: Command,
+
+    #[arg(long, default_value_t = false)]
+    ast: bool,
+
     #[arg(long)]
     input: path::PathBuf,
-    // #[arg(long)]
-    // output: path::PathBuf,
+}
+
+#[derive(clap::Subcommand, Debug)]
+enum Command {
+    Parse,
+    Step,
 }
 
 #[derive(pest_derive::Parser)]
@@ -83,9 +95,26 @@ fn main() {
     let args = Args::parse();
 
     let input_icfp = fs::read_to_string(&args.input).unwrap();
-    let mut parse_result = <ICFPParser as pest::Parser<_>>::parse(Rule::expr, &input_icfp).unwrap();
+    let ast: Expr = if !args.ast {
+        let mut parse_result =
+            <ICFPParser as pest::Parser<_>>::parse(Rule::expr, &input_icfp).unwrap();
 
-    let parse_tree = parse_result.next().unwrap();
-    let ast = parse(parse_tree).unwrap();
-    println!("AST: {}", serde_json::to_string_pretty(&ast).unwrap());
+        let parse_tree = parse_result.next().unwrap();
+        parse(parse_tree).unwrap()
+    } else {
+        serde_json::from_str(&input_icfp).unwrap()
+    };
+
+    match args.command {
+        Command::Parse => {
+            println!("AST: {}", serde_json::to_string_pretty(&ast).unwrap());
+        }
+        Command::Step => {
+            let mut executor = rust_parser::executor::Executor {
+                variables: HashMap::new(),
+            };
+            let next = executor.step(Box::new(ast));
+            println!("AST: {}", serde_json::to_string_pretty(&next).unwrap());
+        }
+    }
 }
