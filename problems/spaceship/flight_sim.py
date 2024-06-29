@@ -74,11 +74,14 @@ if __name__ == "__main__":
     positions, velocities = calculate_path(moves)
     pos_max = np.max(positions, axis=0)
     pos_min = np.min(positions, axis=0)
-
+    
     # Calculate extents
     map_min = np.min(np.stack([level_min, pos_min], axis=0), axis=0)
     map_max = np.max(np.stack([level_max, pos_max], axis=0), axis=0)
     extents = [map_min, map_max]
+    print(f"Level Extents: {level_min} -> {level_max}")
+    print(f"Position Extents: {pos_min} -> {pos_max}")
+
 
     # Create base map
     base_map = make_map(grid, extents)
