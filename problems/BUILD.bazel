@@ -1,0 +1,6 @@
+package(default_visibility = ["//visibility:public"])
+
+filegroup(
+    name = "3d",
+    srcs = glob(["3d/*.txt"]),
+)

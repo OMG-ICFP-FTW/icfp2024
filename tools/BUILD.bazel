@@ -11,5 +11,7 @@ py_console_script_binary(
         "//icfp_lang:icfp_py",
     ] + [
         requirement('requests'),
+        requirement('numpy'),
+        requirement('scipy'),
     ],
 )
