@@ -28,8 +28,16 @@ impl Value {
         )
     }
 
+    pub fn encode_string(source: &str) -> String {
+        todo!("encode_string")
+    }
+
     pub fn decode_integer(encoded: &str) -> Value {
         Value::Int(Value::decode_integer_body(encoded))
+    }
+
+    pub fn encode_integer_body(i: i64) -> String {
+        todo!("encode_string")
     }
 
     pub fn decode_integer_body(encoded: &str) -> i64 {
