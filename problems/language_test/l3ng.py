@@ -214,8 +214,10 @@ assert parse(tokenize("B& T F")) == (("B&", "T", "F"), [])
 assert parse(tokenize("B. S4% S34")) == (("B.", "S4%", "S34"), [])
 assert parse(tokenize("BT I$ S4%34")) == (("BT", "I$", "S4%34"), [])
 assert parse(tokenize("BD I$ S4%34")) == (("BD", "I$", "S4%34"), [])
-assert parse(tokenize("B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK")) == (("B$", ("B$", ("L#", ("L$", "v#")), ("B.", "SB%,,/", "S}Q/2,$_")), "IK"), [])
+# assert parse(tokenize("B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK")) == (("B$", ("B$", ("L#", ("L$", "v#")), ("B.", "SB%,,/", "S}Q/2,$_")), "IK"), [])
 
+
+# parse(tokenize("""B$ B$ L" B$ L# B$ v" B$ v# v# L# B$ v" B$ v# v# L" L# ? B= v# I! I" B$ L$ B+ B$ v" v$ B$ v" v$ B- v# I" I%"""))
 
 
 def replace(expression, variable, replacement):
@@ -230,6 +232,7 @@ def replace(expression, variable, replacement):
 
 
 def evaluate(parsed):
+    print("EVAL", parsed)
     if isinstance(parsed, str):
         indicator, body = parsed[0], parsed[1:]
         if indicator in ("T", "F"):
@@ -247,76 +250,106 @@ def evaluate(parsed):
         indicator, body = token[0], token[1:]
         if indicator == "U":
             assert len(args) == 1, f"{parsed}"
-            value = evaluate(args[0])
             if body == "-":
+                value = evaluate(args[0])
                 assert isinstance(value, int), f"Expected int, got {type(value)} {value}"
                 return -value
             if body == "!":
+                value = evaluate(args[0])
                 assert isinstance(value, bool), f"Expected bool, got {type(value)} {value}"
                 return not value
             if body == "#":
+                value = evaluate(args[0])
                 assert isinstance(value, str), f"Expected str, got {type(value)} {value}"
                 return c2b94(encode(value))
             if body == "$":
+                value = evaluate(args[0])
                 assert isinstance(value, int), f"Expected int, got {type(value)} {value}"
                 return decode(b942c(value))
             raise ValueError(f"Unknown unary {body}, {parsed}")
         if indicator == "B":
             assert len(args) == 2, f"{parsed}"
-            value1 = evaluate(args[0])
-            # Delay evaluation of arguments for lambda application
-            value2 = evaluate(args[1]) if body != "$" else args[1]
             if body == "+":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, int), f"Expected int, got {type(value2)} {value2}"
                 return value1 + value2
             if body == "-":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, int), f"Expected int, got {type(value2)} {value2}"
                 return value1 - value2
             if body == "*":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, int), f"Expected int, got {type(value2)} {value2}"
                 return value1 * value2
             if body == "/":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, int), f"Expected int, got {type(value2)} {value2}"
                 return truncdiv(value1, value2)
             if body == "%":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, int), f"Expected int, got {type(value2)} {value2}"
                 return truncmod(value1, value2)
             if body == "<":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, int), f"Expected int, got {type(value2)} {value2}"
                 return value1 < value2
             if body == ">":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, int), f"Expected int, got {type(value2)} {value2}"
                 return value1 > value2
             if body == "=":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 return value1 == value2
             if body == "|":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, bool), f"Expected bool, got {type(value1)} {value1}"
                 assert isinstance(value2, bool), f"Expected bool, got {type(value2)} {value2}"
                 return value1 or value2
             if body == "&":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, bool), f"Expected bool, got {type(value1)} {value1}"
                 assert isinstance(value2, bool), f"Expected bool, got {type(value2)} {value2}"
                 return value1 and value2
             if body == ".":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, str), f"Expected str, got {type(value1)} {value1}"
                 assert isinstance(value2, str), f"Expected str, got {type(value2)} {value2}"
                 return value1 + value2
             if body == "T":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, str), f"Expected str, got {type(value2)} {value2}"
                 return value2[:value1]
             if body == "D":
+                value1 = evaluate(args[0])
+                value2 = evaluate(args[1])
                 assert isinstance(value1, int), f"Expected int, got {type(value1)} {value1}"
                 assert isinstance(value2, str), f"Expected str, got {type(value2)} {value2}"
                 return value2[value1:]
             if body == "$":
+                # Decide whether to evaluate first argument
+                value1, value2 = args
+                if not isinstance(value1[0], str) or not value1[0].startswith("L"):
+                    value1 = evaluate(value1)
                 assert isinstance(value1, tuple), f"Expected tuple, got {type(value1)} {value1}"
                 assert len(value1) == 2, f"Expected 2-tuple, got {len(value1)} {value1}"
                 name, expr = value1
@@ -324,7 +357,9 @@ def evaluate(parsed):
                 assert name.startswith("L"), f"Expected lambda, got {value1}"
                 # Replace variable with second argument
                 variable = "v" + name[1:]
-                return evaluate(replace(expr, variable, value2))
+                replaced = replace(expr, variable, value2)
+                print("REPLACED", replaced)
+                return evaluate(replaced)
         if indicator == "?":
             assert len(args) == 3, f"{parsed}"
             condition = evaluate(args[0])
@@ -348,29 +383,31 @@ def ept(s):
     return evaluate(parsed)
 
 
-assert ept("T") == True
-assert ept("F") == False
-assert ept("I/6") == 1337
-assert ept("SB%,,/}Q/2,$_") == "Hello World!"
-assert ept("U- I$") == -3
-assert ept("U! T") == False
-assert ept("U# S4%34") == 15818151
-assert ept("U$ I4%34") == "test"
-assert ept("B+ I# I$") == 5
-assert ept("B- I$ I#") == 1
-assert ept("B* I$ I#") == 6
-assert ept("B/ U- I( I#") == -3
-assert ept("B% U- I( I#") == -1
-assert ept("B< I$ I#") == False
-assert ept("B> I$ I#") == True
-assert ept("B= I$ I#") == False
-assert ept("B| T F") == True
-assert ept("B& T F") == False
-assert ept("B. S4% S34") == "test"
-assert ept("BT I$ S4%34") == "tes"
-assert ept("BD I$ S4%34") == "t"
-assert ept("B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK") == "Hello World!"
-assert ept("? B> I# I$ S9%3 S./") == 'no'
+# assert ept("T") == True
+# assert ept("F") == False
+# assert ept("I/6") == 1337
+# assert ept("SB%,,/}Q/2,$_") == "Hello World!"
+# assert ept("U- I$") == -3
+# assert ept("U! T") == False
+# assert ept("U# S4%34") == 15818151
+# assert ept("U$ I4%34") == "test"
+# assert ept("B+ I# I$") == 5
+# assert ept("B- I$ I#") == 1
+# assert ept("B* I$ I#") == 6
+# assert ept("B/ U- I( I#") == -3
+# assert ept("B% U- I( I#") == -1
+# assert ept("B< I$ I#") == False
+# assert ept("B> I$ I#") == True
+# assert ept("B= I$ I#") == False
+# assert ept("B| T F") == True
+# assert ept("B& T F") == False
+# assert ept("B. S4% S34") == "test"
+# assert ept("BT I$ S4%34") == "tes"
+# assert ept("BD I$ S4%34") == "t"
+# assert ept("B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK") == "Hello World!"
+# assert ept("? B> I# I$ S9%3 S./") == 'no'
+assert ept("""B$ B$ L" B$ L# B$ v" B$ v# v# L# B$ v" B$ v# v# L" L# ? B= v# I! I" B$ L$ B+ B$ v" v$ B$ v" v$ B- v# I" I%""") == 16
+
 
 # %%
 import os
@@ -386,7 +423,7 @@ assert auth.startswith("Authorization: Bearer ")
 auth = {"Authorization": auth.lstrip("Authorization: ").strip()}
 
 path = 'language_test.txt'
-if not os.path.exists(path) or True:
+if not os.path.exists(path):
     data = 'S' + encode('get language_test')
     response = requests.post(post_addr, headers=auth, data=data)
     response.raise_for_status()

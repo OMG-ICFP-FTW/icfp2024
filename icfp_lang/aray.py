@@ -119,14 +119,14 @@ with open('../problems/index/index.txt', 'w') as file:
 #         with open(path, 'w') as file:
 #             file.write(result['decoded'])
 
-# # %% echo
-# done = False
-# while not done:
-#     result = request(f'echo {hash(random.randbytes(1024))}', force=True)
-#     print(result['decoded'])
-#     if "You scored some points" not in result['decoded']:
-#         done = True
-#     time.sleep(5)
+# %% echo
+done = False
+while not done:
+    result = request(f'echo {hash(random.randbytes(1024))}', force=True)
+    print(result['decoded'])
+    if "You scored some points" not in result['decoded']:
+        done = True
+    time.sleep(5)
 
 
 # # %% get language_test info
