@@ -98,8 +98,9 @@ Researchers expect that the limit on the amount beta reductions is the only limi
 Unknown operators
 
 The above set of language constructs are all that researchers have discovered, and it is conjectured that the Cult will never use anything else in their communication towards Earth. However, it is unknown whether more language constructs exist.
-
 '''
+
+import math
 
 
 test_path = 'language_test.txt'
@@ -160,7 +161,7 @@ def evaluate(s):
         assert body, f"Expected non-empty body, got {body}, {s}"
         return decode(body), remainder
     if indicator == "U":
-        assert body in ['-', '!', '#', '$'], f"Expected one of -!#$, got {body}, {s}"
+        assert body, f"Expected one of -!#$, got {body}, {s}"
         if body == '-':
             value, remainder = evaluate(remainder)
             assert isinstance(value, int), f"Expected int, got {type(value)}, {s}"
@@ -177,6 +178,53 @@ def evaluate(s):
             value, remainder = evaluate(remainder)
             assert isinstance(value, int), f"Expected int, got {type(value)}, {s}"
             return decode(b942c(value)), remainder
+    if indicator == "B":
+        assert body, f"Expected non-empty body, got {body}, {s}"
+        op = body
+        value1, remainder = evaluate(remainder)
+        value2, remainder = evaluate(remainder)
+        if op == '+':
+            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
+            return value1 + value2, remainder
+        if op == '-':
+            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
+            return value1 - value2, remainder
+        if op == '*':
+            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
+            return value1 * value2, remainder
+        if op == '/':
+            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
+            return math.trunc(value1 / value2), remainder
+        if op == '%':
+            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
+            if value1 < 0:
+                value1, value2 = -value1, -value2
+            return value1 % value2, remainder
+        if op == '<':
+            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
+            return value1 < value2, remainder
+        if op == '>':
+            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
+            return value1 > value2, remainder
+        if op == '=':
+            assert isinstance(value1, (int, bool, str)) and isinstance(value2, (int, bool, str)), f"Expected int, bool or str, got {type(value1)}, {type(value2)}, {s}"
+            return value1 == value2, remainder
+        if op == '|':
+            assert isinstance(value1, bool) and isinstance(value2, bool), f"Expected bool, got {type(value1)}, {type(value2)}, {s}"
+            return value1 or value2, remainder
+        if op == '&':
+            assert isinstance(value1, bool) and isinstance(value2, bool), f"Expected bool, got {type(value1)}, {type(value2)}, {s}"
+            return value1 and value2, remainder
+        if op == '.':
+            assert isinstance(value1, str) and isinstance(value2, str), f"Expected str, got {type(value1)}, {type(value2)}, {s}"
+            return value1 + value2, remainder
+        if op == 'T':
+            assert isinstance(value1, int) and isinstance(value2, str), f"Expected int, str, got {type(value1)}, {type(value2)}, {s}"
+            return value2[:value1], remainder
+        if op == 'D':
+            assert isinstance(value1, int) and isinstance(value2, str), f"Expected int, str, got {type(value1)}, {type(value2)}, {s}"
+            return value2[value1:], remainder
+        raise ValueError(f"Unknown binary operator {op}, {s}")
     raise ValueError(f"Unknown indicator {indicator}, {s}")
 
 
@@ -188,3 +236,16 @@ assert evaluate("U- I$") == (-3, "")
 assert evaluate("U! T") == (False, "")
 assert evaluate("U# S4%34") == (15818151, "")
 assert evaluate("U$ I4%34") == ("test", "")
+assert evaluate("B+ I# I$") == (5, "")
+assert evaluate("B- I$ I#") == (1, "")
+assert evaluate("B* I$ I#") == (6, "")
+assert evaluate("B/ U- I( I#") == (-3, "")
+assert evaluate("B% U- I( I#") == (-1, "")
+assert evaluate("B< I$ I#") == (False, "")
+assert evaluate("B> I$ I#") == (True, "")
+assert evaluate("B= I$ I#") == (False, "")
+assert evaluate("B| T F") == (True, "")
+assert evaluate("B& T F") == (False, "")
+assert evaluate("B. S4% S34") == ("test", "")
+assert evaluate("BT I$ S4%34") == ("tes", "")
+assert evaluate("BD I$ S4%34") == ("t", "")
