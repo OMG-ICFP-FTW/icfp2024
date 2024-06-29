@@ -1,0 +1,14 @@
+load("@pip//:requirements.bzl", "requirement")
+load("@pip//:requirements.bzl", "requirement")
+
+package(default_visibility = ["//visibility:public"])
+
+
+py_binary(
+    name = "flight_sim",
+    main = "flight_sim.py",
+    srcs = ["flight_sim.py"],
+    deps = [
+        requirement('numpy'),
+    ],
+)
