@@ -165,6 +165,19 @@ def parse(s):
         value1, remainder = parse(remainder)
         value2, remainder = parse(remainder)
         return (token, value1, value2), remainder
+    if indicator == "?":
+        assert not body, f"Expected empty body, got {body}, {s}"
+        value1, remainder = parse(remainder)
+        value2, remainder = parse(remainder)
+        value3, remainder = parse(remainder)
+        return (token, value1, value2, value3), remainder
+    if indicator == "L":
+        assert body, f"Expected non-empty body, got {body}, {s}"
+        value, remainder = parse(remainder)
+        return (token, value), remainder
+    if indicator == "v":
+        assert body, f"Expected non-empty body, got {body}, {s}"
+        return token, remainder
     raise ValueError(f"Unknown indicator {indicator}, {s}")
 
 
@@ -177,3 +190,16 @@ assert parse("U! T") == (("U!", "T"), None)
 assert parse("U# S4%34") == (("U#", "S4%34"), None)
 assert parse("U$ I4%34") == (("U$", "I4%34"), None)
 assert parse("B+ I# I$") == (("B+", "I#", "I$"), None)
+assert parse("B- I$ I#") == (("B-", "I$", "I#"), None)
+assert parse("B* I$ I#") == (("B*", "I$", "I#"), None)
+assert parse("B/ U- I( I#") == (("B/", ("U-", "I("), "I#"), None)
+assert parse("B% U- I( I#") == (("B%", ("U-", "I("), "I#"), None)
+assert parse("B< I$ I#") == (("B<", "I$", "I#"), None)
+assert parse("B> I$ I#") == (("B>", "I$", "I#"), None)
+assert parse("B= I$ I#") == (("B=", "I$", "I#"), None)
+assert parse("B| T F") == (("B|", "T", "F"), None)
+assert parse("B& T F") == (("B&", "T", "F"), None)
+assert parse("B. S4% S34") == (("B.", "S4%", "S34"), None)
+assert parse("BT I$ S4%34") == (("BT", "I$", "S4%34"), None)
+assert parse("BD I$ S4%34") == (("BD", "I$", "S4%34"), None)
+parse("B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK")
