@@ -67,20 +67,20 @@ def request(s, force=False):
 # with open('../problems/index/index.txt', 'w') as file:
 #     file.write(result['decoded'])
 
-# # %%  Get lambdaman info and send solutions
-# lm_cache_path = '../problems/lambdaman/'
-# os.makedirs(lm_cache_path, exist_ok=True)
-# result = request('get lambdaman', force=True)
-# with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
-#     file.write(result['decoded'])
-# for i in range(1, 6):
-#     path = f'../problems/lambdaman/solution{i}.txt'
-#     if os.path.exists(path):
-#         with open(path, 'r') as file:
-#             solution = file.read().strip()
-#     msg = f"solve lambdaman{i} {solution}"
-#     result = request(msg)
-#     print(result['decoded'])
+# %%  Get lambdaman info and send solutions
+lm_cache_path = '../problems/lambdaman/'
+os.makedirs(lm_cache_path, exist_ok=True)
+result = request('get lambdaman', force=True)
+with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
+    file.write(result['decoded'])
+for i in range(1, 22):
+    path = f'../problems/lambdaman/solution{i}.txt'
+    if os.path.exists(path):
+        with open(path, 'r') as file:
+            solution = file.read().strip()
+    msg = f"solve lambdaman{i} {solution}"
+    result = request(msg)
+    print(result['decoded'])
 
 # # %% Get spaceship info
 # ss_cache_path = '../problems/spaceship/'
@@ -129,7 +129,7 @@ def request(s, force=False):
 #     time.sleep(5)
 
 
-# %% get language_test info
-result = request('get language_test')
-with open('../problems/language_test/info.txt', 'w') as file:
-    file.write(result['decoded'])
+# # %% get language_test info
+# result = request('get language_test')
+# with open('../problems/language_test/info.txt', 'w') as file:
+#     file.write(result['decoded'])

@@ -167,6 +167,7 @@ class Level:
 
 # %% run the levels
 while True:
-    for i in [7, 8, 11, 12,13, 14, 15, 16]:
-        level = Level.load(i)
-        level.solve().save()
+    for i in range(1, 22):
+        if os.path.exists(f"level{i}.txt"):
+            level = Level.load(i)
+            level.solve().save()

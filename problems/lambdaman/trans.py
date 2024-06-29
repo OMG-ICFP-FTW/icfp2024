@@ -18,7 +18,7 @@ def encode(s):
     return s.translate(encode_trans)
 
 
-for i in range(17):
+for i in range(25):
     path = f'level{i}.icfp'
     if os.path.exists(path):
         with open(path, 'r') as file:
