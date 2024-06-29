@@ -227,6 +227,8 @@ def replace(expression, variable, replacement):
     if isinstance(expression, (str, int, bool)):
         return replacement if expression == variable else expression
     if isinstance(expression, tuple):
+        if len(expression) == 2 and expression[0] == "L" + variable[1:]:
+                return expression
         return tuple(replace(e, variable, replacement) for e in expression)
     raise ValueError(f"Unknown expression type {expression}")
 
