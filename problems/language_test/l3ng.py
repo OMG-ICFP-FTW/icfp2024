@@ -143,170 +143,37 @@ def encode(s):
     return s.translate(encode_trans)
 
 
-
-def evaluate(s):
-    assert isinstance(s, str), f"Expected string, got {type(s)}"
-    assert len(s), f"Expected string of length, got {s}"
-    # get first token
+def parse(s):
     parts = s.split(maxsplit=1)
-    token, remainder = parts if len(parts) > 1 else (s, "")
+    token, remainder = parts if len(parts) > 1 else (s, None)
     indicator, body = token[0], token[1:]
     if indicator in ["T", "F"]:
         assert not body, f"Expected empty body, got {body}, {s}"
-        return token == "T", remainder
+        return token, remainder
     if indicator == "I":
         assert body, f"Expected non-empty body, got {body}, {s}"
-        return c2b94(body), remainder
+        return token, remainder
     if indicator == "S":
         assert body, f"Expected non-empty body, got {body}, {s}"
-        return decode(body), remainder
+        return token, remainder
     if indicator == "U":
-        assert body, f"Expected one of -!#$, got {body}, {s}"
-        if body == '-':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, int), f"Expected int, got {type(value)}, {s}"
-            return -value, remainder
-        if body == '!':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, bool), f"Expected bool, got {type(value)}, {s}"
-            return not value, remainder
-        if body == '#':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, str), f"Expected str, got {type(value)}, {s}"
-            return c2b94(encode(value)), remainder
-        if body == '$':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, int), f"Expected int, got {type(value)}, {s}"
-            return decode(b942c(value)), remainder
+        assert body in ("-", "!", "#", "$"), f"Expected -/!/#/$, got {body}, {s}"
+        value, remainder = parse(remainder)
+        return (token, value), remainder
     if indicator == "B":
-        assert body, f"Expected non-empty body, got {body}, {s}"
-        op = body
-        value1, remainder = evaluate(remainder)
-        value2, remainder = evaluate(remainder)
-        if op == '+':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 + value2, remainder
-        if op == '-':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 - value2, remainder
-        if op == '*':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 * value2, remainder
-        if op == '/':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return math.trunc(value1 / value2), remainder
-        if op == '%':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            if value1 < 0:
-                value1, value2 = -value1, -value2
-            return value1 % value2, remainder
-        if op == '<':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 < value2, remainder
-        if op == '>':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 > value2, remainder
-        if op == '=':
-            assert isinstance(value1, (int, bool, str)) and isinstance(value2, (int, bool, str)), f"Expected int, bool or str, got {type(value1)}, {type(value2)}, {s}"
-            return value1 == value2, remainder
-        if op == '|':
-            assert isinstance(value1, bool) and isinstance(value2, bool), f"Expected bool, got {type(value1)}, {type(value2)}, {s}"
-            return value1 or value2, remainder
-        if op == '&':
-            assert isinstance(value1, bool) and isinstance(value2, bool), f"Expected bool, got {type(value1)}, {type(value2)}, {s}"
-            return value1 and value2, remainder
-        if op == '.':
-            assert isinstance(value1, str) and isinstance(value2, str), f"Expected str, got {type(value1)}, {type(value2)}, {s}"
-            return value1 + value2, remainder
-        if op == 'T':
-            assert isinstance(value1, int) and isinstance(value2, str), f"Expected int, str, got {type(value1)}, {type(value2)}, {s}"
-            return value2[:value1], remainder
-        if op == 'D':
-            assert isinstance(value1, int) and isinstance(value2, str), f"Expected int, str, got {type(value1)}, {type(value2)}, {s}"
-            return value2[value1:], remainder
-        if op == '$':
-            # assert v1 is callable
-            assert isinstance(value1, str) and isinstance(value2, str), f"Expected str, got {type(value1)}, {type(value2)}, {s}"
-            return value1 + value2, remainder
-        raise ValueError(f"Unknown binary operator {op}, {s}")
-    if indicator == '?':
-        assert not body, f"Expected empty body, got {body}, {s}"
-        condition, remainder = evaluate(remainder)
-        first, remainder = evaluate(remainder)
-        second, remainder = evaluate(remainder)
-        print(condition, first, second, remainder)
-        assert isinstance(condition, bool), f"Expected bool, got {type(condition)}, {s}"
-        return (first if condition else second), remainder
+        assert body in ("+", "-", "*", "/", "%", "<", ">", "=", "|", "&", ".", "T", "D", "$"), f"Expected +,-,*,/,%,<,>,=,|,&,.,T,D,$, got {body}, {s}"
+        value1, remainder = parse(remainder)
+        value2, remainder = parse(remainder)
+        return (token, value1, value2), remainder
     raise ValueError(f"Unknown indicator {indicator}, {s}")
 
 
-assert evaluate("T") == (True, "")
-assert evaluate("F") == (False, "")
-assert evaluate("I/6") == (1337, "")
-assert evaluate("SB%,,/}Q/2,$_") == ("Hello World!", "")
-assert evaluate("U- I$") == (-3, "")
-assert evaluate("U! T") == (False, "")
-assert evaluate("U# S4%34") == (15818151, "")
-assert evaluate("U$ I4%34") == ("test", "")
-assert evaluate("B+ I# I$") == (5, "")
-assert evaluate("B- I$ I#") == (1, "")
-assert evaluate("B* I$ I#") == (6, "")
-assert evaluate("B/ U- I( I#") == (-3, "")
-assert evaluate("B% U- I( I#") == (-1, "")
-assert evaluate("B< I$ I#") == (False, "")
-assert evaluate("B> I$ I#") == (True, "")
-assert evaluate("B= I$ I#") == (False, "")
-assert evaluate("B| T F") == (True, "")
-assert evaluate("B& T F") == (False, "")
-assert evaluate("B. S4% S34") == ("test", "")
-assert evaluate("BT I$ S4%34") == ("tes", "")
-assert evaluate("BD I$ S4%34") == ("t", "")
-assert evaluate("? B> I# I$ S9%3 S./") == ("no", "")
-
-
-
-'''
-Stepping through by hand, the example:
-
-
-B$ L# B$ L" B+ v" v" B* I$ I# v8
-B$ [L#] [B$ L" B+ v" v" B* I$ I# v8]
-
-
-
-B$ L" B+ v" v" B* I$ I#
-B+ B* I$ I# B* I$ I#
-B+ I' B* I$ I#
-B+ I' I'
-I-
-
-
-
-
-B$ L# B$ L" B+ v" v" B* I$ I# v8
-B$ L" B+ v" v" B* I$ I#
-B+ B* I$ I# B* I$ I#
-B+ I' B* I$ I#
-B+ I' I'
-I-
-
-
-B(apply) L(2) B(apply) L(1) B(add) v(1) v(1) B(mul) I(3) I(2) v(23)
-B(apply) L(1) B(add) v(1) v(1) B(mul) I(3) I(2)
-B(add) B(mul) I(3) I(2) B(mul) I(3) I(2)
-B(add) I(6) B(mul) I(3) I(2)
-B(add) I(6) I(6)
-I(12)
-
-
-B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK
-
-B(apply) B(apply) L(3) L(2) v(3) B(concat) S(Hello) S(World!) I(42)
-B(apply) [B(apply) L(3) L(2) v(3) B(concat) S(Hello) S(World!) I(42)]
-
-sub:
-B(apply) L(3) L(2) v(3) B(concat) S(Hello) S(World!) I(42)
-B(apply) [L(3) L(2) v(3) B(concat) S(Hello) S(World!)] I(42)
-
-
-'''
+assert parse("T") == ("T", None)
+assert parse("F") == ("F", None)
+assert parse("I/6") == ("I/6", None)
+assert parse("SB%,,/}Q/2,$_") == ("SB%,,/}Q/2,$_", None)
+assert parse("U- I$") == (("U-", "I$"), None)
+assert parse("U! T") == (("U!", "T"), None)
+assert parse("U# S4%34") == (("U#", "S4%34"), None)
+assert parse("U$ I4%34") == (("U$", "I4%34"), None)
+assert parse("B+ I# I$") == (("B+", "I#", "I$"), None)

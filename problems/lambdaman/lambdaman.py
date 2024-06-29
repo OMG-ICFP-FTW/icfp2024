@@ -167,6 +167,6 @@ class Level:
 
 # %% run the levels
 while True:
-    for i in range(3, 6):
+    for i in [7, 8, 11, 12,13, 14, 15, 16]:
         level = Level.load(i)
         level.solve().save()
