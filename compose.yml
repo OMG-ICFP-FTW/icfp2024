@@ -1,0 +1,10 @@
+version: '3'
+services:
+  development:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    volumes:
+      - .:/home/dev/src
+      - .bash_history:/home/dev/.bash_history
+    user: dev
