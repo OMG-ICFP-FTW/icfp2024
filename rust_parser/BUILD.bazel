@@ -1,12 +1,33 @@
 load("@rules_rust//rust:defs.bzl", "rust_binary", "rust_library", "rust_test")
 
-rust_binary(
+rust_library(
     name = "rust_parser",
+    srcs = ["src/lib.rs"],
+    data = [
+        ":icfp.pest",
+    ],
+    deps = [
+        "@crate_index//:anyhow",
+        "@crate_index//:clap",
+        "@crate_index//:pest",
+        "@crate_index//:thiserror",
+        "@crate_index//:serde",
+        "@crate_index//:serde_json",
+    ],
+    proc_macro_deps = [
+        "@crate_index//:pest_derive",
+    ],
+)
+
+rust_binary(
+    name = "parser",
     srcs = ["src/bin/rust_parser.rs"],
     data = [
         ":icfp.pest",
     ],
     deps = [
+        ":rust_parser",
+    ] + [
         "@crate_index//:anyhow",
         "@crate_index//:clap",
         "@crate_index//:pest",
