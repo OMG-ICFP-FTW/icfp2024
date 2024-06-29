@@ -1,0 +1,38 @@
+string = { "S" ~ ("!" | "\"" | "#" | "$" | "%" | "&" | "\'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "[" | "\\" | "]" | "^" | "_" | "`" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "{" | "|" | "}" | "~")+ }
+integer_body = { ("!" | "\"" | "#" | "$" | "%" | "&" | "\'" | "(" | ")" | "*" | "+" | "," | "-" | "." | "/" | "0" | "1" | "2" | "3" | "4" | "5" | "6" | "7" | "8" | "9" | ":" | ";" | "<" | "=" | ">" | "?" | "@" | "A" | "B" | "C" | "D" | "E" | "F" | "G" | "H" | "I" | "J" | "K" | "L" | "M" | "N" | "O" | "P" | "Q" | "R" | "S" | "T" | "U" | "V" | "W" | "X" | "Y" | "Z" | "[" | "\\" | "]" | "^" | "_" | "`" | "a" | "b" | "c" | "d" | "e" | "f" | "g" | "h" | "i" | "j" | "k" | "l" | "m" | "n" | "o" | "p" | "q" | "r" | "s" | "t" | "u" | "v" | "w" | "x" | "y" | "z" | "{" | "|" | "}" | "~")+ }
+integer = { "I" ~ integer_body}
+
+boolean = { true | false }
+    true = { "T" }
+    false = { "F" }
+value = _{string | integer | ( boolean ~ " ")}
+
+unary_op = _{ neg | not | str_to_int | int_to_str }
+    neg = { "-" }
+    not = { "!" }
+    str_to_int = { "#" }
+    int_to_str = { "$" }
+unary = { (integer ~ unary_op) | (boolean ~ unary_op) | (string ~ unary_op)}
+
+binary_op = { add | sub | mult | div | mod | lt | gt | eq | or | and | cat | take | drop | apply }
+    add = { "+" }
+    sub = { "-" }
+    mult = { "*" }
+    div = { "/" }
+    mod = { "%" }
+    lt = { "<" }
+    gt = { ">" }
+    eq = { "=" }
+    or = { "|" }
+    and = { "&" }
+    cat = { "." }
+    take = { "T" }
+    drop = { "D" }
+    apply = { "$" }
+binary = { "B" ~ binary_op ~ " " ~ expr ~ " " ~ expr }
+
+if = { "?" ~ " " ~ expr ~ " " ~ expr ~ " " ~ expr }
+lambda = { "L" ~ integer_body ~ " " ~ expr }
+variable = { "v" ~ integer_body }
+
+expr = { value | unary | binary | lambda | if | variable }
