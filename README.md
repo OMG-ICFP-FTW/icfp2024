@@ -22,3 +22,4 @@ result = decode(example)
 
 print(result)
 ```
+* Run cli `bazel run //icfp_lang:mooc_terminal`
