@@ -23,7 +23,87 @@ impl Executor {
     }
 
     pub fn eval_binary(&mut self, op: BinaryOp, first: Box<Expr>, second: Box<Expr>) -> Box<Expr> {
-        todo!("apply_binary")
+        match op {
+            BinaryOp::Add => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Int(one + two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Sub => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Int(one - two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Mult => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Int(one * two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Div => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Int(one / two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Mod => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Int(one % two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Lt => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Bool(one < two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Gt => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Bool(one > two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Eq => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Int(two))) => {
+                    Box::new(Expr::Value(Value::Bool(one == two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Or => match (*first, *second) {
+                (Expr::Value(Value::Bool(one)), Expr::Value(Value::Bool(two))) => {
+                    Box::new(Expr::Value(Value::Bool(one | two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::And => match (*first, *second) {
+                (Expr::Value(Value::Bool(one)), Expr::Value(Value::Bool(two))) => {
+                    Box::new(Expr::Value(Value::Bool(one & two)))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Cat => match (*first, *second) {
+                (Expr::Value(Value::Str(one)), Expr::Value(Value::Str(two))) => {
+                    Box::new(Expr::Value(Value::Str(format!("{}{}", one, two))))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Take => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Str(two))) => {
+                    Box::new(Expr::Value(Value::Str(two[..(one as usize)].to_string())))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Drop => match (*first, *second) {
+                (Expr::Value(Value::Int(one)), Expr::Value(Value::Str(two))) => {
+                    Box::new(Expr::Value(Value::Str(two[(one as usize)..].to_string())))
+                }
+                _ => panic!("Negation operator received a non-integer value"),
+            },
+            BinaryOp::Apply => todo!("Apply lambda"),
+        }
     }
 
     pub fn eval_unary(&mut self, op: UnaryOp, val: Value) -> Box<Expr> {
