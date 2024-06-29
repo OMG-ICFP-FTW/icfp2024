@@ -3,7 +3,7 @@ use std::collections::HashMap;
 
 use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub enum Value {
     Str(String),
     Bool(bool),
@@ -88,7 +88,7 @@ mod decode_test {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub enum UnaryOp {
     Neg,
     Not,
@@ -108,13 +108,13 @@ impl UnaryOp {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct Unary {
     pub op: UnaryOp,
     pub val: Value,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub enum BinaryOp {
     Add,
     Sub,
@@ -193,30 +193,30 @@ impl BinaryOp {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct Binary {
     pub op: BinaryOp,
     pub first: Box<Expr>,
     pub second: Box<Expr>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct If {
     pub condition: Box<Expr>,
     pub if_true: Box<Expr>,
     pub if_false: Box<Expr>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct Lambda {
     pub body: i64,
     pub arg: Box<Expr>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct Variable(pub i64);
 
-#[derive(Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
+#[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub enum Expr {
     Value(Value),
     Unary(Unary),

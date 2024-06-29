@@ -23,7 +23,7 @@ struct Args {
 #[derive(clap::Subcommand, Debug)]
 enum Command {
     Parse,
-    Step,
+    Step { iterations: i64 },
 }
 
 #[derive(pest_derive::Parser)]
@@ -109,11 +109,16 @@ fn main() {
         Command::Parse => {
             println!("AST: {}", serde_json::to_string_pretty(&ast).unwrap());
         }
-        Command::Step => {
+        Command::Step { iterations } => {
             let mut executor = rust_parser::executor::Executor {
                 variables: HashMap::new(),
             };
-            let next = executor.step(Box::new(ast));
+            let mut next = executor.step(Box::new(ast));
+            let mut i = 1;
+            while i < iterations {
+                next = executor.step(next);
+                i += 1;
+            }
             println!("AST: {}", serde_json::to_string_pretty(&next).unwrap());
         }
     }
