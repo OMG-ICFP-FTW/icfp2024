@@ -39,3 +39,8 @@ rust_binary(
         "@crate_index//:pest_derive",
     ],
 )
+
+rust_test(
+    name = "parser_test",
+    crate = ":rust_parser",
+)
