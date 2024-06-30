@@ -1,5 +1,7 @@
 use std::collections::HashMap;
 
+use lazy_static::lazy_static;
+
 use crate::ast::*;
 
 pub struct Executor {
@@ -130,17 +132,18 @@ impl Executor {
 
     pub fn fully_evaluate(&mut self, expression: Box<Expr>) -> Value {
         let mut next = self.step(expression);
-        let mut max_iter = 1_000_000;
-        while max_iter > 0 {
+        let max_iter = 1_000_000;
+        let mut i = 0;
+        while i < max_iter {
             match *next {
                 Expr::Value(val) => return val,
                 _ => (),
             }
             next = self.step(next);
-            max_iter -= 1;
+            i += 1;
         }
         panic!(
-            "Full evaluation failed to resolve to a terminal value: final state = {:?}",
+            "Full evaluation failed to resolve to a terminal value: final state = {:#?}",
             next
         )
     }
@@ -187,6 +190,55 @@ impl Executor {
             _ => {
                 panic!("Found non-boolean terminal")
             }
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use std::fs;
+
+    use super::*;
+
+    lazy_static! {
+        static ref INPUT_TO_OUTPUT: Vec<(String, String)> = {
+            let inputs = fs::read_to_string("tests/inputs.icfp").unwrap();
+            let outputs = fs::read_to_string("tests/outputs.txt").unwrap();
+
+            inputs
+                .lines()
+                .filter(|s| !s.starts_with("#"))
+                .map(|s| s.trim().to_string())
+                .zip(
+                    outputs
+                        .lines()
+                        .filter(|s| !s.starts_with("#"))
+                        .map(|s| s.trim().to_string()),
+                )
+                .collect()
+        };
+    }
+
+    #[test]
+    fn executor_test() {
+        for (input, expected) in INPUT_TO_OUTPUT.iter() {
+            let mut parse_result =
+                <crate::parser::ICFPParser as pest::Parser<_>>::parse(crate::parser::Rule::expr, input).unwrap();
+
+            let parse_tree = parse_result.next().unwrap();
+            let ast = Box::new(crate::parser::parse(parse_tree).unwrap());
+
+            let mut executor = Executor {
+                variables: HashMap::new(),
+            };
+            let actual = executor.fully_evaluate(ast);
+            let stringified = match actual {
+                Value::Bool(val) => serde_json::to_string(&val).unwrap(),
+                Value::Str(val) => serde_json::to_string(&val).unwrap(),
+                Value::Int(val) => serde_json::to_string(&val).unwrap(),
+            };
+
+            assert_eq!(expected, &stringified, "input={}", input);
         }
     }
 }

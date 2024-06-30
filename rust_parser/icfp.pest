@@ -6,14 +6,14 @@ integer = { "I" ~ integer_body}
 boolean = { true | false }
     true = { "T" }
     false = { "F" }
-value = _{string | integer | ( boolean ~ " ")}
+value = _{string | integer | boolean}
 
 unary_op = _{ neg | not | str_to_int | int_to_str }
     neg = { "-" }
     not = { "!" }
     str_to_int = { "#" }
     int_to_str = { "$" }
-unary = { (integer ~ unary_op) | (boolean ~ unary_op) | (string ~ unary_op)}
+unary = { "U" ~ unary_op ~ " " ~ ( integer | boolean | string ) }
 
 binary_op = { add | sub | mult | div | mod | lt | gt | eq | or | and | cat | take | drop | apply }
     add = { "+" }

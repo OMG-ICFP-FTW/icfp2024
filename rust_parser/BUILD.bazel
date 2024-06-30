@@ -23,9 +23,6 @@ rust_library(
 rust_binary(
     name = "parser",
     srcs = ["src/bin/rust_parser.rs"],
-    data = [
-        ":icfp.pest",
-    ],
     deps = [
         ":rust_parser",
     ] + [
@@ -36,12 +33,25 @@ rust_binary(
         "@crate_index//:serde",
         "@crate_index//:serde_json",
     ],
-    proc_macro_deps = [
-        "@crate_index//:pest_derive",
-    ],
 )
 
 rust_test(
     name = "parser_test",
     crate = ":rust_parser",
+    data = [
+        ":icfp.pest",
+        "//tests:icfp_testcases",
+    ],
+    deps = [
+        "@crate_index//:anyhow",
+        "@crate_index//:clap",
+        "@crate_index//:lazy_static",
+        "@crate_index//:pest",
+        "@crate_index//:serde",
+        "@crate_index//:serde_json",
+        "@crate_index//:thiserror",
+    ],
+    proc_macro_deps = [
+        "@crate_index//:pest_derive",
+    ],
 )

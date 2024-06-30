@@ -1,5 +1,6 @@
-use lazy_static::lazy_static;
 use std::collections::HashMap;
+
+use lazy_static::lazy_static;
 
 use serde::{Deserialize, Serialize};
 
@@ -29,15 +30,43 @@ impl Value {
     }
 
     pub fn encode_string(source: &str) -> String {
-        todo!("encode_string")
+        lazy_static! {
+            static ref ENCODE_TRANSLATION_TABLE: HashMap<char, char> = TARGET
+                .chars()
+                .zip((33..(33 + TARGET.len() as u32)).map(|c| c as u8 as char))
+                .collect();
+        }
+
+        source
+            .chars()
+            .map(|c| *ENCODE_TRANSLATION_TABLE.get(&c).unwrap_or(&c))
+            .collect()
     }
 
     pub fn decode_integer(encoded: &str) -> Value {
         Value::Int(Value::decode_integer_body(encoded))
     }
 
-    pub fn encode_integer_body(i: i64) -> String {
-        todo!("encode_string")
+    pub fn encode_integer_body(mut i: i64) -> String {
+        lazy_static! {
+            static ref BASE94_CHARS: Vec<char> = (33..127).map(|c| c as u8 as char).collect();
+        }
+
+        // Edge case: if number is 0, return the corresponding base 94 character ('!')
+        if i == 0 {
+            return BASE94_CHARS[0].to_string();
+        }
+
+        let mut result = Vec::new();
+
+        while i > 0 {
+            let remainder = (i % 94) as usize;
+            result.push(BASE94_CHARS[remainder]);
+            i /= 94;
+        }
+
+        // Reverse the result because characters were appended in reverse order
+        result.iter().rev().collect()
     }
 
     pub fn decode_integer_body(encoded: &str) -> i64 {
