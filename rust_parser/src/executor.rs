@@ -39,19 +39,18 @@ impl Executor {
 
     pub fn eval_binary(&mut self, op: BinaryOp, first: Box<Expr>, second: Box<Expr>) -> Box<Expr> {
         match op {
-            BinaryOp::Apply => {
-                let evaluated = self.maximally_evaluate(first);
-                match *evaluated {
-                    Expr::Lambda(Lambda { body, arg }) => {
-                        self.variables.insert(body, second);
-                        arg
-                    }
-                    _ => panic!(
-                        "Apply operator received a non-lambda value: {:?}",
-                        evaluated
-                    ),
+            BinaryOp::Apply => match *first {
+                Expr::Lambda(Lambda { body, arg }) => {
+                    self.variables.insert(body, second);
+                    arg
                 }
-            }
+                Expr::Value(val) => panic!("Apply operator received a non-lambda value: {:?}", val),
+                val @ _ => Box::new(Expr::Binary(Binary {
+                    op,
+                    first: self.step(Box::new(val)),
+                    second,
+                })),
+            },
             _ => match (*first, *second) {
                 (Expr::Value(first_val), Expr::Value(second_val)) => match op {
                     BinaryOp::Add => match (first_val, second_val) {
