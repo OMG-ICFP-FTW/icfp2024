@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # %%
-
+import os
 from dataclasses import dataclass, field
 from PIL import Image, ImageDraw
 
@@ -29,7 +29,12 @@ class Level:
             for line in f.read().strip().splitlines():
                 x, y = map(int, line.split())
                 points.append((x, y))
-        return cls(i, points)
+        level = cls(i, points)
+        solution = f"solution{i}.txt"
+        if os.path.exists(solution):
+            with open(solution) as f:
+                level.walk(f.read().strip())
+        return level
 
     def move(self, move):
         assert move in '123456789', f'Invalid move {move}'
@@ -72,17 +77,17 @@ class Level:
         height = maxy - miny + 1
         assert width < 1000 and height < 1000, f"too big {width} x {height}"
         # Create a blank image
-        img = Image.new('RGBA', (width, height), 'black')
+        img = Image.new('RGB', (width, height), 'black')
         draw = ImageDraw.Draw(img)
         # Draw the stars
         stars = [(x - minx, y - miny) for x, y in self.stars]
-        draw.point(stars, fill='white')
+        draw.point(stars, fill=(255, 255, 255, 255))
         # Draw the trajectory
         path = [(x - minx, y - miny) for x, y in self.path]
-        draw.point(path, fill='red')
+        draw.point(path, fill=(255, 0, 0, 100))
         # Draw the spaceship
         ship = [(self.px - minx, self.py - miny)]
-        draw.point(ship, fill='blue')
+        draw.point(ship, fill=(0, 0, 255, 100))
         return img
 
     def show(self, big=400):
@@ -94,6 +99,5 @@ class Level:
         display(img)
 
 
-level = Level.load(1)
-level.walk('316483')
+level = Level.load(3)
 level.show()
