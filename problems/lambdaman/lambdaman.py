@@ -159,17 +159,15 @@ class Level:
             with open(path) as f:
                 prev_score = len(f.read().strip())
             if self.score >= prev_score:
+                print(f"Worse {self.i} score {self.score} vs {prev_score}")
                 return
         with open(path, 'w') as f:
             f.write(self.solution)
         print(f"Saved solution {self.i}, score", self.score)
 
 
-Level.load(6).solve().save()
-
-# %% run the levels
 while True:
-    for i in range(1, 22):
+    for i in range(9, 13):
         if os.path.exists(f"level{i}.txt"):
             level = Level.load(i)
             level.solve().save()

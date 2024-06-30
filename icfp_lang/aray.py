@@ -73,28 +73,28 @@ def request(s, force=False, nocode=False):
 
 # %%  Get lambdaman info and send solutions
 lm_cache_path = '../problems/lambdaman/'
-# os.makedirs(lm_cache_path, exist_ok=True)
-# result = request('get lambdaman', force=True)
-# with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
-#     file.write(result['decoded'])
-# for i in range(1, 22):
-#     path = f'../problems/lambdaman/solution{i}.txt'
-#     if os.path.exists(path):
-#         with open(path, 'r') as file:
-#             solution = file.read().strip()
-#     msg = f"solve lambdaman{i} {solution}"
-#     result = request(msg)
-#     print(result['decoded'])
-
-# %%
-for i in [6]:
-    print("trying 6")
-    path = f'../problems/lambdaman/solution{i}.icfp'
+os.makedirs(lm_cache_path, exist_ok=True)
+result = request('get lambdaman', force=True)
+with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
+    file.write(result['decoded'])
+for i in range(1, 22):
+    path = f'../problems/lambdaman/solution{i}.txt'
     if os.path.exists(path):
         with open(path, 'r') as file:
             solution = file.read().strip()
-    result = request(solution, nocode=True)
+    msg = f"solve lambdaman{i} {solution}"
+    result = request(msg)
     print(result['decoded'])
+
+# # %%
+# for i in [6]:
+#     print("trying 6")
+#     path = f'../problems/lambdaman/solution{i}.icfp'
+#     if os.path.exists(path):
+#         with open(path, 'r') as file:
+#             solution = file.read().strip()
+#     result = request(solution, nocode=True)
+#     print(result['decoded'])
 
 # # # %% Get spaceship info
 # ss_cache_path = '../problems/spaceship/'
@@ -132,15 +132,6 @@ for i in [6]:
 #         result = request(msg)
 #         with open(path, 'w') as file:
 #             file.write(result['decoded'])
-
-# # %% echo
-# done = False
-# while not done:
-#     result = request(f'echo {hash(random.randbytes(1024))}', force=True)
-#     print(result['decoded'])
-#     if "You scored some points" not in result['decoded']:
-#         done = True
-#     time.sleep(5)
 
 
 # # %% get language_test info
