@@ -4,6 +4,7 @@ import os
 import random
 import time
 from dataclasses import dataclass
+from PIL import Image, ImageDraw
 
 
 @dataclass
@@ -14,9 +15,14 @@ class Level:
 
     @classmethod
     def load(cls, i: int):
-        with open(f"./level{i}.txt") as f:
+        with open(f"level{i}.txt") as f:
             grid = [list(row) for row in f.read().strip().splitlines()]
-        return cls(i, grid)
+        solution = f"solution{i}.txt"
+        level = cls(i, grid)
+        # if os.path.exists(solution):
+        #     with open(solution) as f:
+        #         level.walk(f.read().strip())
+        return level
 
     def __str__(self):
         return self.solution + "\n" + "\n".join("".join(row) for row in self.grid)
@@ -110,7 +116,7 @@ class Level:
             self.solution += direction
         else:
             raise ValueError(f"Invalid move: {direction}")
-        
+
     def astar(self, dst):
         """ Compute shortest path from Lambda to destination """
         # Use manhattan distance as heuristic
@@ -165,9 +171,51 @@ class Level:
             f.write(self.solution)
         print(f"Saved solution {self.i}, score", self.score)
 
+    def render(self):
+        assert self.width < 1000 and self.height < 1000, f"too big {self.width} x {self.height}"
+        # Create a blank image
+        img = Image.new('RGB', (self.width, self.height), 'black')
+        draw = ImageDraw.Draw(img)
+        # Draw the grid
+        for i, row in enumerate(self.grid):
+            for j, cell in enumerate(row):
+                if cell == '#':  # Blue
+                    draw.point([(j, i)], fill=(0, 0, 255, 255))
+                elif cell == '.':  # Green
+                    draw.point([(j, i)], fill=(0, 255, 0, 255))
+                elif cell == 'L':  # Red
+                    draw.point([(j, i)], fill=(255, 0, 0, 255))
+        return img
 
-while True:
-    for i in range(9, 13):
-        if os.path.exists(f"level{i}.txt"):
-            level = Level.load(i)
-            level.solve().save()
+    def animate(self, duration=300, big=400, solution=None):
+        if solution is None:
+            with open(f"solution{self.i}.txt") as f:
+                solution = f.read().strip()
+        assert len(solution) < 1000, f"Solution too long {len(solution)}"
+        images = [self.render()]
+        for move in solution:
+            self.step(move)
+            images.append(self.render())
+
+        if self.width < big or self.height < big:
+            scale = big // max(self.width, self.height)
+            print("Scaling by", scale)
+            size = (self.width * scale, self.height * scale)
+            images = [img.resize(size, resample=Image.Resampling.NEAREST) for img in images]
+
+        filename = f'animation{self.i}.gif'
+        images[0].save(filename,
+               save_all=True, append_images=images[1:],
+               optimize=False, duration=duration, loop=0)
+        print("Saved", filename)
+
+
+for i in range(30):
+    if os.path.exists(f'level{i}.txt'):
+        print(f"level {i}")
+        if os.path.exists(f'solution{i}.txt'):
+            with open(f'solution{i}.txt') as f:
+                solution = f.read().strip()
+            if len(solution) < 1000:
+                if not os.path.exists(f'animation{i}.gif'):
+                    Level(i).animate(solution=solution)
