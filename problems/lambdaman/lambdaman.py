@@ -174,7 +174,7 @@ class Level:
     def render(self):
         assert self.width < 1000 and self.height < 1000, f"too big {self.width} x {self.height}"
         # Create a blank image
-        img = Image.new('RGB', (self.width, self.height), 'black')
+        img = Image.new('RGBA', (self.width, self.height), 'black')
         draw = ImageDraw.Draw(img)
         # Draw the grid
         for i, row in enumerate(self.grid):
@@ -185,6 +185,9 @@ class Level:
                     draw.point([(j, i)], fill=(0, 255, 0, 255))
                 elif cell == 'L':  # Red
                     draw.point([(j, i)], fill=(255, 0, 0, 255))
+                else:  # Black
+                    assert cell == ' ', cell
+                    draw.point([(j, i)], fill=(0, 0, 0, 255))
         return img
 
     def animate(self, duration=300, big=400, solution=None):
@@ -216,6 +219,10 @@ for i in range(30):
         if os.path.exists(f'solution{i}.txt'):
             with open(f'solution{i}.txt') as f:
                 solution = f.read().strip()
-            if len(solution) < 1000:
-                if not os.path.exists(f'animation{i}.gif'):
-                    Level(i).animate(solution=solution)
+            if len(solution) < 10000:
+                if not os.path.exists(f'animation{i}.gif') or True:
+                    try:
+                        Level.load(i).animate(solution=solution)
+                    except Exception as e:
+                        print(e)
+        Level.load(i).render().save(f'level{i}.png')
