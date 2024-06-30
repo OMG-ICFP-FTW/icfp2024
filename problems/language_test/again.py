@@ -1,14 +1,16 @@
 #!/usr/bin/env python
 # %%
-
-from typing import Tuple, List, Optional, Dict
-from dataclasses import dataclass, field
+from typing import List, Optional, Dict
+from dataclasses import dataclass
 import random
-
 import math
+import time
+import requests
+
 
 def truncdiv(a, b):
     return math.trunc(a / b)
+
 
 def truncmod(a, b):
     return a - b * truncdiv(a, b)
@@ -319,3 +321,41 @@ if tree.indicator == 'S':
 
 
 # %%
+
+post_addr = "https://boundvariable.space/communicate"
+# Authorization header
+auth_path = '../../misc/SUBMISSION_HEADER.txt'
+with open(auth_path, 'r') as file:
+    auth = file.read()
+assert auth.startswith("Authorization: Bearer ")
+# convert to dict for requests
+auth = {"Authorization": auth.lstrip("Authorization: ").strip()}
+
+def post(s, filename=None):
+    assert isinstance(s, str), f"Expected string, got {type(s)}"
+    assert not s.startswith("S"), "Send bare string not encoded"
+    data = 'S' + encode(s)
+    response = requests.post(post_addr, headers=auth, data=data)
+    response.raise_for_status()
+    decoded = decode(response.text[1:].strip())
+    if filename:
+        with open(filename, 'w') as file:
+            file.write(decoded)
+    return decoded
+
+result = post('get index', '../index/index.txt')
+print(result)
+
+# %% lambdaman
+post('get lambdaman', '../lambdaman/info.txt')
+for i in range(1, 22):
+    time.sleep(4)
+    print(f"Getting lambdaman {i}")
+    post(f'get lambdaman{i}', f'../lambdaman/level{i}.txt')
+
+# %% spaceship
+post('get spaceship', '../spaceship/info.txt')
+for i in range(1, 26):
+    time.sleep(4)
+    print(f"Getting spaceship {i}")
+    post(f'get spaceship{i}', f'../spaceship/level{i}.txt')
