@@ -9,7 +9,7 @@ use crate::ast::*;
 pub struct ICFPParser;
 
 ///
-/// unique_scope counts down as all "natural" scopes are positive integers
+/// `unique_scope` counts down as all "natural" scopes are positive integers
 pub fn parse(
     parse_tree: pest::iterators::Pair<Rule>,
     scope_rewrites: &BTreeMap<i64, i64>,

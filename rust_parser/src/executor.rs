@@ -1,7 +1,5 @@
 use std::collections::HashMap;
 
-use lazy_static::lazy_static;
-
 use crate::ast::*;
 
 pub struct Executor {
@@ -124,8 +122,8 @@ impl Executor {
         let mut max_iter = 1_000_000;
         while max_iter > 0 {
             match *next {
-                Expr::Unary(_) | Expr::Binary(_) | Expr::If(_) => (),
-                _ => return next,
+                Expr::Value(_) | Expr::Lambda(_) | Expr::Variable(_) => return next,
+                _ => (),
             }
             next = self.step(next);
             max_iter -= 1;
@@ -204,6 +202,8 @@ mod tests {
     use std::cell::RefCell;
     use std::collections::BTreeMap;
     use std::rc::Rc;
+
+    use lazy_static::lazy_static;
 
     use super::*;
 
