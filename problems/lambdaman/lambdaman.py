@@ -171,7 +171,7 @@ class Level:
             f.write(self.solution)
         print(f"Saved solution {self.i}, score", self.score)
 
-    def render(self):
+    def render(self, big=400, filename=None):
         assert self.width < 1000 and self.height < 1000, f"too big {self.width} x {self.height}"
         # Create a blank image
         img = Image.new('RGBA', (self.width, self.height), 'black')
@@ -188,25 +188,28 @@ class Level:
                 else:  # Black
                     assert cell == ' ', cell
                     draw.point([(j, i)], fill=(0, 0, 0, 255))
+
+        if self.width < big or self.height < big:
+            scale = big // max(self.width, self.height)
+            size = (self.width * scale, self.height * scale)
+            img = img.resize(size, resample=Image.Resampling.NEAREST)
+
+        if filename:
+            img.save(filename)
+            print("Saved", filename)
         return img
 
-    def animate(self, duration=300, big=400, solution=None):
+    def animate(self, duration=300, big=400, solution=None, filename=None):
         if solution is None:
             with open(f"solution{self.i}.txt") as f:
                 solution = f.read().strip()
         assert len(solution) < 1000, f"Solution too long {len(solution)}"
-        images = [self.render()]
+        images = [self.render(big=big)]
         for move in solution:
             self.step(move)
-            images.append(self.render())
+            images.append(self.render(big=big))
 
-        if self.width < big or self.height < big:
-            scale = big // max(self.width, self.height)
-            print("Scaling by", scale)
-            size = (self.width * scale, self.height * scale)
-            images = [img.resize(size, resample=Image.Resampling.NEAREST) for img in images]
-
-        filename = f'animation{self.i}.gif'
+        filename = filename or f'animation{self.i}.gif'
         images[0].save(filename,
                save_all=True, append_images=images[1:],
                optimize=False, duration=duration, loop=0)
@@ -216,13 +219,9 @@ class Level:
 for i in range(30):
     if os.path.exists(f'level{i}.txt'):
         print(f"level {i}")
-        if os.path.exists(f'solution{i}.txt'):
-            with open(f'solution{i}.txt') as f:
-                solution = f.read().strip()
-            if len(solution) < 10000:
-                if not os.path.exists(f'animation{i}.gif') or True:
-                    try:
-                        Level.load(i).animate(solution=solution)
-                    except Exception as e:
-                        print(e)
-        Level.load(i).render().save(f'level{i}.png')
+        level = Level.load(i)
+        level.render(filename=f"level{i}.png")
+        try:
+            Level.load(i).animate()
+        except Exception as e:
+            print(e)
