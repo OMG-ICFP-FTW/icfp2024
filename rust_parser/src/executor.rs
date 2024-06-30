@@ -11,10 +11,13 @@ impl Executor {
         // println!("Step evaluating: {:#?}", pgm);
         match *pgm {
             Expr::Value(val) => Box::new(Expr::Value(val)),
-            Expr::Unary(Unary { op, val }) => {
-                let arg = self.fully_evaluate(val);
-                self.eval_unary(op, arg)
-            }
+            Expr::Unary(Unary { op, val: expr }) => match *expr {
+                Expr::Value(val) => self.eval_unary(op, val),
+                _ => Box::new(Expr::Unary(Unary {
+                    op,
+                    val: self.step(expr),
+                })),
+            },
             Expr::Binary(Binary { op, first, second }) => self.eval_binary(op, first, second),
             Expr::Lambda(lambda) => Box::new(Expr::Lambda(lambda)),
             Expr::If(If {
@@ -36,76 +39,6 @@ impl Executor {
 
     pub fn eval_binary(&mut self, op: BinaryOp, first: Box<Expr>, second: Box<Expr>) -> Box<Expr> {
         match op {
-            BinaryOp::Add => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => Box::new(Expr::Value(Value::Int(one + two))),
-                _ => panic!("Addition operator received a non-integer value"),
-            },
-            BinaryOp::Sub => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => Box::new(Expr::Value(Value::Int(one - two))),
-                _ => panic!("Subtraction operator received a non-integer value"),
-            },
-            BinaryOp::Mult => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => Box::new(Expr::Value(Value::Int(one * two))),
-                _ => panic!("Multiplication operator received a non-integer value"),
-            },
-            BinaryOp::Div => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => Box::new(Expr::Value(Value::Int(one / two))),
-                _ => panic!("Dividing operator received a non-integer value"),
-            },
-            BinaryOp::Mod => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => Box::new(Expr::Value(Value::Int(one % two))),
-                _ => panic!("Modulo operator received a non-integer value"),
-            },
-            BinaryOp::Lt => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => Box::new(Expr::Value(Value::Bool(one < two))),
-                _ => panic!("Less than operator received a non-integer value"),
-            },
-            BinaryOp::Gt => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => Box::new(Expr::Value(Value::Bool(one > two))),
-                _ => panic!("Great than operator received a non-integer value"),
-            },
-            BinaryOp::Eq => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Int(two)) => {
-                    Box::new(Expr::Value(Value::Bool(one == two)))
-                }
-                (Value::Bool(one), Value::Bool(two)) => {
-                    Box::new(Expr::Value(Value::Bool(one == two)))
-                }
-                (Value::Str(one), Value::Str(two)) => {
-                    Box::new(Expr::Value(Value::Bool(one == two)))
-                }
-                _ => panic!("Equality operator received a non-integer value"),
-            },
-            BinaryOp::Or => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Bool(one), Value::Bool(two)) => {
-                    Box::new(Expr::Value(Value::Bool(one | two)))
-                }
-                _ => panic!("Or operator received a non-boolean value"),
-            },
-            BinaryOp::And => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Bool(one), Value::Bool(two)) => {
-                    Box::new(Expr::Value(Value::Bool(one & two)))
-                }
-                _ => panic!("And operator received a non-boolean value"),
-            },
-            BinaryOp::Cat => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Str(one), Value::Str(two)) => {
-                    Box::new(Expr::Value(Value::Str(format!("{}{}", one, two))))
-                }
-                _ => panic!("Concatenation operator received a non-string value"),
-            },
-            BinaryOp::Take => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Str(two)) => {
-                    Box::new(Expr::Value(Value::Str(two[..(one as usize)].to_string())))
-                }
-                _ => panic!("Take operator received a the wrong types"),
-            },
-            BinaryOp::Drop => match (self.fully_evaluate(first), self.fully_evaluate(second)) {
-                (Value::Int(one), Value::Str(two)) => {
-                    Box::new(Expr::Value(Value::Str(two[(one as usize)..].to_string())))
-                }
-                _ => panic!("Drop operator received a the wrong types"),
-            },
             BinaryOp::Apply => {
                 let evaluated = self.maximally_evaluate(first);
                 match *evaluated {
@@ -119,6 +52,109 @@ impl Executor {
                     ),
                 }
             }
+            _ => match (*first, *second) {
+                (Expr::Value(first_val), Expr::Value(second_val)) => match op {
+                    BinaryOp::Add => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Int(one + two)))
+                        }
+                        _ => panic!("Addition operator received a non-integer value"),
+                    },
+                    BinaryOp::Sub => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Int(one - two)))
+                        }
+                        _ => panic!("Subtraction operator received a non-integer value"),
+                    },
+                    BinaryOp::Mult => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Int(one * two)))
+                        }
+                        _ => panic!("Multiplication operator received a non-integer value"),
+                    },
+                    BinaryOp::Div => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Int(one / two)))
+                        }
+                        _ => panic!("Dividing operator received a non-integer value"),
+                    },
+                    BinaryOp::Mod => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Int(one % two)))
+                        }
+                        _ => panic!("Modulo operator received a non-integer value"),
+                    },
+                    BinaryOp::Lt => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Bool(one < two)))
+                        }
+                        _ => panic!("Less than operator received a non-integer value"),
+                    },
+                    BinaryOp::Gt => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Bool(one > two)))
+                        }
+                        _ => panic!("Great than operator received a non-integer value"),
+                    },
+                    BinaryOp::Eq => match (first_val, second_val) {
+                        (Value::Int(one), Value::Int(two)) => {
+                            Box::new(Expr::Value(Value::Bool(one == two)))
+                        }
+                        (Value::Bool(one), Value::Bool(two)) => {
+                            Box::new(Expr::Value(Value::Bool(one == two)))
+                        }
+                        (Value::Str(one), Value::Str(two)) => {
+                            Box::new(Expr::Value(Value::Bool(one == two)))
+                        }
+                        _ => panic!("Equality operator received a non-integer value"),
+                    },
+                    BinaryOp::Or => match (first_val, second_val) {
+                        (Value::Bool(one), Value::Bool(two)) => {
+                            Box::new(Expr::Value(Value::Bool(one | two)))
+                        }
+                        _ => panic!("Or operator received a non-boolean value"),
+                    },
+                    BinaryOp::And => match (first_val, second_val) {
+                        (Value::Bool(one), Value::Bool(two)) => {
+                            Box::new(Expr::Value(Value::Bool(one & two)))
+                        }
+                        _ => panic!("And operator received a non-boolean value"),
+                    },
+                    BinaryOp::Cat => match (first_val, second_val) {
+                        (Value::Str(one), Value::Str(two)) => {
+                            Box::new(Expr::Value(Value::Str(format!("{}{}", one, two))))
+                        }
+                        _ => panic!("Concatenation operator received a non-string value"),
+                    },
+                    BinaryOp::Take => match (first_val, second_val) {
+                        (Value::Int(one), Value::Str(two)) => {
+                            Box::new(Expr::Value(Value::Str(two[..(one as usize)].to_string())))
+                        }
+                        _ => panic!("Take operator received a the wrong types"),
+                    },
+                    BinaryOp::Drop => match (first_val, second_val) {
+                        (Value::Int(one), Value::Str(two)) => {
+                            Box::new(Expr::Value(Value::Str(two[(one as usize)..].to_string())))
+                        }
+                        _ => panic!("Drop operator received a the wrong types"),
+                    },
+                    BinaryOp::Apply => unreachable!(),
+                },
+                (Expr::Value(first_val), second) => {
+                    return Box::new(Expr::Binary(Binary {
+                        op,
+                        first: Box::new(Expr::Value(first_val)),
+                        second: self.step(Box::new(second)),
+                    }))
+                }
+                (first, second) => {
+                    return Box::new(Expr::Binary(Binary {
+                        op,
+                        first: self.step(Box::new(first)),
+                        second: Box::new(second),
+                    }))
+                }
+            },
         }
     }
 
