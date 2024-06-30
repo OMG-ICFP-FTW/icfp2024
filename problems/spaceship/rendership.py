@@ -81,19 +81,26 @@ class Level:
         offset_x = content_width
         offset_y = content_height
 
+        stroke_width = max(total_width, total_height) / 100
+        star_size = stroke_width * 2
+        ship_size = stroke_width * 2
+        print('stroke_width', stroke_width)
+        print('star_size', star_size)
+        print('ship_size', ship_size)
+
         svg = f'<svg width="{total_width}" height="{total_height}" xmlns="http://www.w3.org/2000/svg">\n'
         
         # Draw the stars
         for x, y in self.stars:
-            svg += f'  <circle cx="{x - minx + offset_x}" cy="{y - miny + offset_y}" r="1" fill="black" />\n'
+            svg += f'  <circle cx="{x - minx + offset_x}" cy="{y - miny + offset_y}" r="{star_size}" fill="black" />\n'
         
         # Draw the trajectory
         if self.path:
             path_points = " ".join([f"{x - minx + offset_x},{y - miny + offset_y}" for x, y in self.path])
-            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="0.5" />\n'
+            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="{stroke_width}" />\n'
         
         # Draw the spaceship
-        svg += f'  <circle cx="{self.px - minx + offset_x}" cy="{self.py - miny + offset_y}" r="2" fill="blue" />\n'
+        svg += f'  <circle cx="{self.px - minx + offset_x}" cy="{self.py - miny + offset_y}" r="{ship_size}" fill="blue" />\n'
         
         svg += '</svg>'
         return svg
