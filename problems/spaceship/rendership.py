@@ -72,23 +72,29 @@ class Level:
 
     def render_svg(self):
         minx, miny, maxx, maxy = self.extents()
-        width = maxx - minx + 1
-        height = maxy - miny + 1
-        assert width < 1000 and height < 1000, f"too big {width} x {height}"
+        content_width = maxx - minx + 1
+        content_height = maxy - miny + 1
+        assert content_width < 1000 and content_height < 1000, f"too big {content_width} x {content_height}"
 
-        svg = f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">\n'
+        # Calculate the new dimensions with extra space
+        total_width = content_width * 3
+        total_height = content_height * 3
+        offset_x = content_width
+        offset_y = content_height
+
+        svg = f'<svg width="{total_width}" height="{total_height}" xmlns="http://www.w3.org/2000/svg">\n'
         
         # Draw the stars
         for x, y in self.stars:
-            svg += f'  <circle cx="{x - minx}" cy="{y - miny}" r="1" fill="black" />\n'
+            svg += f'  <circle cx="{x - minx + offset_x}" cy="{y - miny + offset_y}" r="1" fill="black" />\n'
         
         # Draw the trajectory
         if self.path:
-            path_points = " ".join([f"{x - minx},{y - miny}" for x, y in self.path])
-            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="1" />\n'
+            path_points = " ".join([f"{x - minx + offset_x},{y - miny + offset_y}" for x, y in self.path])
+            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="0.5" />\n'
         
         # Draw the spaceship
-        svg += f'  <circle cx="{self.px - minx}" cy="{self.py - miny}" r="2" fill="blue" />\n'
+        svg += f'  <circle cx="{self.px - minx + offset_x}" cy="{self.py - miny + offset_y}" r="2" fill="blue" />\n'
         
         svg += '</svg>'
         return svg
@@ -100,5 +106,10 @@ class Level:
         print(f"SVG saved to {filename}")
 
 
-level = Level.load(3)
-level.save_svg("level3.svg")
+for i in range(30):
+    try:
+        print(f"level {i}")
+        level = Level.load(i)
+        level.save_svg(f"level{i}.svg")
+    except Exception as e:
+        print(e)
