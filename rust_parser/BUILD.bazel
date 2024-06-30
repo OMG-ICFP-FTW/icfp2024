@@ -23,6 +23,9 @@ rust_library(
 rust_binary(
     name = "parser",
     srcs = ["src/bin/rust_parser.rs"],
+    # rustc_flags = [
+    #       "-Clink-args=-Wl,-stack_size,0x800000000",
+    # ],
     deps = [
         ":rust_parser",
     ] + [

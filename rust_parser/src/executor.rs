@@ -8,6 +8,7 @@ pub struct Executor {
 
 impl Executor {
     pub fn step(&mut self, pgm: Box<Expr>) -> Box<Expr> {
+        // println!("Step evaluating: {:#?}", pgm);
         match *pgm {
             Expr::Value(val) => Box::new(Expr::Value(val)),
             Expr::Unary(Unary { op, val }) => {
@@ -21,11 +22,15 @@ impl Executor {
                 if_true,
                 if_false,
             }) => self.eval_if(condition, if_true, if_false),
-            Expr::Variable(Variable(id)) => self
-                .variables
-                .get(&id)
-                .expect("ID not yet present at variable evaluation time")
-                .clone(),
+            Expr::Variable(Variable(id)) => {
+                let expr = self
+                    .variables
+                    .get(&id)
+                    .expect("ID not yet present at variable evaluation time")
+                    .clone();
+                // println!("Variable evaluated to {:#?}", expr);
+                expr
+            }
         }
     }
 
@@ -238,7 +243,8 @@ mod tests {
             let parse_tree = parse_result.next().unwrap();
             let rewrites = BTreeMap::new();
             let unique_scope = Rc::new(RefCell::new(-1));
-            let ast = Box::new(crate::parser::parse(parse_tree, &rewrites, unique_scope).unwrap());
+            let ast =
+                Box::new(crate::parser::parse(parse_tree, &rewrites, unique_scope, true).unwrap());
 
             let mut executor = Executor {
                 variables: HashMap::new(),

@@ -14,6 +14,7 @@ pub fn parse(
     parse_tree: pest::iterators::Pair<Rule>,
     scope_rewrites: &BTreeMap<i64, i64>,
     unique_scope: Rc<RefCell<i64>>,
+    with_substitution: bool,
 ) -> anyhow::Result<Expr> {
     match parse_tree.as_rule() {
         Rule::string => Ok(Expr::Value(Value::decode_string(
@@ -40,6 +41,7 @@ pub fn parse(
                     inner.next().unwrap(),
                     scope_rewrites,
                     Rc::clone(&unique_scope),
+                    with_substitution,
                 )?),
             }))
         }
@@ -51,11 +53,13 @@ pub fn parse(
                     inner.next().unwrap(),
                     scope_rewrites,
                     Rc::clone(&unique_scope),
+                    with_substitution,
                 )?),
                 second: Box::new(parse(
                     inner.next().unwrap(),
                     scope_rewrites,
                     Rc::clone(&unique_scope),
+                    with_substitution,
                 )?),
             }))
         }
@@ -66,34 +70,50 @@ pub fn parse(
                     inner.next().unwrap(),
                     scope_rewrites,
                     Rc::clone(&unique_scope),
+                    with_substitution,
                 )?),
                 if_true: Box::new(parse(
                     inner.next().unwrap(),
                     scope_rewrites,
                     Rc::clone(&unique_scope),
+                    with_substitution,
                 )?),
                 if_false: Box::new(parse(
                     inner.next().unwrap(),
                     scope_rewrites,
                     Rc::clone(&unique_scope),
+                    with_substitution,
                 )?),
             }))
         }
         Rule::lambda => {
             let mut inner = parse_tree.into_inner();
             let id = Value::decode_integer_body(inner.next().unwrap().as_str());
-            let rewrite_id = *unique_scope.borrow();
-            *unique_scope.borrow_mut() = rewrite_id - 1;
-            let mut rewrites = scope_rewrites.clone();
-            rewrites.insert(id, rewrite_id);
-            Ok(Expr::Lambda(Lambda {
-                body: rewrite_id,
-                arg: Box::new(parse(
-                    inner.next().unwrap(),
-                    &rewrites,
-                    Rc::clone(&unique_scope),
-                )?),
-            }))
+            if with_substitution {
+                let rewrite_id = *unique_scope.borrow();
+                *unique_scope.borrow_mut() = rewrite_id - 1;
+                let mut rewrites = scope_rewrites.clone();
+                rewrites.insert(id, rewrite_id);
+                Ok(Expr::Lambda(Lambda {
+                    body: rewrite_id,
+                    arg: Box::new(parse(
+                        inner.next().unwrap(),
+                        &rewrites,
+                        Rc::clone(&unique_scope),
+                        with_substitution,
+                    )?),
+                }))
+            } else {
+                Ok(Expr::Lambda(Lambda {
+                    body: id,
+                    arg: Box::new(parse(
+                        inner.next().unwrap(),
+                        scope_rewrites,
+                        Rc::clone(&unique_scope),
+                        with_substitution,
+                    )?),
+                }))
+            }
         }
         Rule::variable => {
             let mut inner = parse_tree.into_inner();

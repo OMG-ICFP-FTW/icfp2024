@@ -19,6 +19,9 @@ struct Args {
     #[arg(long, default_value_t = false)]
     ast: bool,
 
+    #[arg(long, default_value_t = false)]
+    no_rewrite_id: bool,
+
     #[arg(long)]
     input: path::PathBuf,
 }
@@ -44,7 +47,8 @@ fn main() {
         let parse_tree = parse_result.next().unwrap();
         let rewrites = BTreeMap::new();
         let unique_scope = Rc::new(RefCell::new(-1));
-        rust_parser::parser::parse(parse_tree, &rewrites, unique_scope).unwrap()
+        rust_parser::parser::parse(parse_tree, &rewrites, unique_scope, !args.no_rewrite_id)
+            .unwrap()
     } else {
         serde_json::from_str(&input_icfp).unwrap()
     };
