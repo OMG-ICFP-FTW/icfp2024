@@ -13,7 +13,7 @@ unary_op = _{ neg | not | str_to_int | int_to_str }
     not = { "!" }
     str_to_int = { "#" }
     int_to_str = { "$" }
-unary = { "U" ~ unary_op ~ " " ~ ( integer | boolean | string ) }
+unary = { "U" ~ unary_op ~ " " ~ expr }
 
 binary_op = { add | sub | mult | div | mod | lt | gt | eq | or | and | cat | take | drop | apply }
     add = { "+" }

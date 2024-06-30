@@ -31,8 +31,11 @@ fn main() {
 
     let input_icfp = fs::read_to_string(&args.input).unwrap();
     let ast: Expr = if !args.ast {
-        let mut parse_result =
-            <rust_parser::parser::ICFPParser as pest::Parser<_>>::parse(rust_parser::parser::Rule::expr, &input_icfp).unwrap();
+        let mut parse_result = <rust_parser::parser::ICFPParser as pest::Parser<_>>::parse(
+            rust_parser::parser::Rule::expr,
+            &input_icfp,
+        )
+        .unwrap();
 
         let parse_tree = parse_result.next().unwrap();
         rust_parser::parser::parse(parse_tree).unwrap()
@@ -42,7 +45,7 @@ fn main() {
 
     match args.command {
         Command::Parse => {
-            println!("AST: {}", serde_json::to_string_pretty(&ast).unwrap());
+            println!("AST: {}", &ast);
         }
         Command::Step { iterations } => {
             let mut executor = rust_parser::executor::Executor {
@@ -54,7 +57,7 @@ fn main() {
                 next = executor.step(next);
                 i += 1;
             }
-            println!("AST: {}", serde_json::to_string_pretty(&next).unwrap());
+            println!("AST: {}", &next);
         }
     }
 }

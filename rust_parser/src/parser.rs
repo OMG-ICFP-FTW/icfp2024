@@ -24,14 +24,10 @@ pub fn parse(parse_tree: pest::iterators::Pair<Rule>) -> anyhow::Result<Expr> {
         Rule::unary => {
             let mut inner = parse_tree.into_inner();
             let op = UnaryOp::from_str(inner.next().unwrap().as_str());
-            if let Expr::Value(value) = parse(inner.next().unwrap())? {
-                Ok(Expr::Unary(Unary {
-                    op,
-                    val: value,
-                }))
-            } else {
-                anyhow::bail!("Unary inner parsed to non-value type.")
-            }
+            Ok(Expr::Unary(Unary {
+                op,
+                val: Box::new(parse(inner.next().unwrap())?),
+            }))
         }
         Rule::binary => {
             let mut inner = parse_tree.into_inner();
@@ -65,4 +61,3 @@ pub fn parse(parse_tree: pest::iterators::Pair<Rule>) -> anyhow::Result<Expr> {
         _ => panic!("Unexpected rule found: {:#?}", parse_tree),
     }
 }
-

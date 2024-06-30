@@ -1,3 +1,5 @@
+use std::fmt;
+
 use std::collections::HashMap;
 
 use lazy_static::lazy_static;
@@ -9,6 +11,16 @@ pub enum Value {
     Str(String),
     Bool(bool),
     Int(i64),
+}
+
+impl fmt::Display for Value {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Value::Str(val) => write!(f, "{:?}", val),
+            Value::Bool(val) => write!(f, "{:?}", val),
+            Value::Int(val) => write!(f, "{:?}", val),
+        }
+    }
 }
 
 static TARGET: &'static str = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`|~ \n";
@@ -125,6 +137,17 @@ pub enum UnaryOp {
     IntToStr,
 }
 
+impl fmt::Display for UnaryOp {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            UnaryOp::Neg => write!(f, "-"),
+            UnaryOp::Not => write!(f, "!"),
+            UnaryOp::StrToInt => write!(f, "as_int"),
+            UnaryOp::IntToStr => write!(f, "as_str"),
+        }
+    }
+}
+
 impl UnaryOp {
     pub fn from_str(source: &str) -> UnaryOp {
         match source {
@@ -140,7 +163,13 @@ impl UnaryOp {
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct Unary {
     pub op: UnaryOp,
-    pub val: Value,
+    pub val: Box<Expr>,
+}
+
+impl fmt::Display for Unary {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}({})", self.op, self.val)
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
@@ -159,6 +188,12 @@ pub enum BinaryOp {
     Take,
     Drop,
     Apply,
+}
+
+impl fmt::Display for BinaryOp {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}", self.as_str())
+    }
 }
 
 impl BinaryOp {
@@ -229,11 +264,27 @@ pub struct Binary {
     pub second: Box<Expr>,
 }
 
+impl fmt::Display for Binary {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "{}({}, {})", self.op, self.first, self.second)
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct If {
     pub condition: Box<Expr>,
     pub if_true: Box<Expr>,
     pub if_false: Box<Expr>,
+}
+
+impl fmt::Display for If {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(
+            f,
+            "(if {} {{ {} }} else {{ {} }})",
+            self.condition, self.if_true, self.if_false
+        )
+    }
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
@@ -242,8 +293,20 @@ pub struct Lambda {
     pub arg: Box<Expr>,
 }
 
+impl fmt::Display for Lambda {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "L{}({})", self.body, self.arg)
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub struct Variable(pub i64);
+
+impl fmt::Display for Variable {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        write!(f, "V{}", self.0)
+    }
+}
 
 #[derive(Clone, Serialize, Deserialize, Debug, PartialEq, PartialOrd, Hash)]
 pub enum Expr {
@@ -253,4 +316,17 @@ pub enum Expr {
     Lambda(Lambda),
     If(If),
     Variable(Variable),
+}
+
+impl fmt::Display for Expr {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            Expr::Value(val) => write!(f, "{}", val),
+            Expr::Unary(val) => write!(f, "{}", val),
+            Expr::Binary(val) => write!(f, "{}", val),
+            Expr::Lambda(val) => write!(f, "{}", val),
+            Expr::If(val) => write!(f, "{}", val),
+            Expr::Variable(val) => write!(f, "{}", val),
+        }
+    }
 }

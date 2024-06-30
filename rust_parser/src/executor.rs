@@ -12,7 +12,10 @@ impl Executor {
     pub fn step(&mut self, pgm: Box<Expr>) -> Box<Expr> {
         match *pgm {
             Expr::Value(val) => Box::new(Expr::Value(val)),
-            Expr::Unary(Unary { op, val }) => self.eval_unary(op, val),
+            Expr::Unary(Unary { op, val }) => {
+                let arg = self.fully_evaluate(val);
+                self.eval_unary(op, arg)
+            }
             Expr::Binary(Binary { op, first, second }) => self.eval_binary(op, first, second),
             Expr::Lambda(lambda) => Box::new(Expr::Lambda(lambda)),
             Expr::If(If {
@@ -222,8 +225,11 @@ mod tests {
     #[test]
     fn executor_test() {
         for (input, expected) in INPUT_TO_OUTPUT.iter() {
-            let mut parse_result =
-                <crate::parser::ICFPParser as pest::Parser<_>>::parse(crate::parser::Rule::expr, input).unwrap();
+            let mut parse_result = <crate::parser::ICFPParser as pest::Parser<_>>::parse(
+                crate::parser::Rule::expr,
+                input,
+            )
+            .unwrap();
 
             let parse_tree = parse_result.next().unwrap();
             let ast = Box::new(crate::parser::parse(parse_tree).unwrap());
