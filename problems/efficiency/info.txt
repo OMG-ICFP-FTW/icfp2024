@@ -10,7 +10,7 @@ Did you know that the binary call-by-name application operator `$` has two sibli
 
 The following assignments are available:
 
-* [efficiency1] At least one other team solved it.
+* [efficiency1] You solved it.
 * [efficiency2] At least one other team solved it.
 * [efficiency3] At least one other team solved it.
 * [efficiency4] At least one other team solved it.

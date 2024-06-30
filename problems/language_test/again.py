@@ -359,3 +359,17 @@ for i in range(1, 26):
     time.sleep(4)
     print(f"Getting spaceship {i}")
     post(f'get spaceship{i}', f'../spaceship/level{i}.txt')
+
+# %% 3d
+post('get 3d', '../3d/info.txt')
+for i in range(1, 13):
+    time.sleep(4)
+    print(f"Getting 3d {i}")
+    post(f'get 3d{i}', f'../3d/level{i}.txt')
+
+# %% efficiency
+post('get efficiency', '../efficiency/info.txt')
+for i in range(1, 14):
+    time.sleep(4)
+    print(f"Getting efficiency {i}")
+    post(f'get efficiency{i}', f'../efficiency/level{i}.txt')
