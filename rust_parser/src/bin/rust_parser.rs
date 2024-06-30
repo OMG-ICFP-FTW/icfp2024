@@ -71,6 +71,12 @@ fn main() {
                 i += 1;
             }
             println!("AST: {}", &next);
+            println!("Variables:");
+            let mut vars: Vec<(&i64, &Box<Expr>)> = executor.variables.iter().collect();
+            vars.sort_by(|first, second| second.partial_cmp(first).unwrap());
+            for (k, v) in vars {
+                println!("V{}: {}", k, v)
+            }
         }
     }
 }
