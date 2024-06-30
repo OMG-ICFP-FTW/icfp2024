@@ -1,9 +1,11 @@
+use std::collections::BTreeMap;
 use std::collections::HashMap;
 
 use crate::ast::*;
 
 pub struct Executor {
     pub variables: HashMap<i64, Box<Expr>>,
+    pub next_unique_scope: i64,
 }
 
 impl Executor {
@@ -32,8 +34,55 @@ impl Executor {
                     .expect("ID not yet present at variable evaluation time")
                     .clone();
                 // println!("Variable evaluated to {:#?}", expr);
-                expr
+                self.rewrite_ids(expr)
             }
+        }
+    }
+
+    pub fn rewrite_ids(&mut self, pgm: Box<Expr>) -> Box<Expr> {
+        let rewrites = BTreeMap::new();
+        self.rewrite_ids_impl(pgm, &rewrites)
+    }
+
+    fn rewrite_ids_impl(
+        &mut self,
+        pgm: Box<Expr>,
+        scope_rewrites: &BTreeMap<i64, i64>,
+    ) -> Box<Expr> {
+        match *pgm {
+            Expr::Value(_) => pgm,
+            Expr::Lambda(Lambda { body: id, arg }) => {
+                let rewrite_id = self.next_unique_scope;
+                self.next_unique_scope -= 1;
+                let mut rewrites = scope_rewrites.clone();
+                rewrites.insert(id, rewrite_id);
+                Box::new(Expr::Lambda(Lambda {
+                    body: rewrite_id,
+                    arg: self.rewrite_ids_impl(arg, &rewrites),
+                }))
+            }
+            Expr::Variable(Variable(source_id)) => {
+                let id: i64 = *scope_rewrites.get(&source_id).unwrap_or(&source_id);
+                Box::new(Expr::Variable(Variable(id)))
+            }
+            Expr::Unary(Unary { op, val }) => Box::new(Expr::Unary(Unary {
+                op,
+                val: self.rewrite_ids_impl(val, scope_rewrites),
+            })),
+            Expr::Binary(Binary { op, first, second }) => Box::new(Expr::Binary(Binary {
+                op,
+                first: self.rewrite_ids_impl(first, scope_rewrites),
+                second: self.rewrite_ids_impl(second, scope_rewrites),
+            })),
+            Expr::If(If {
+                condition,
+                if_true,
+                if_false,
+            }) => Box::new(Expr::If(If {
+                condition: self.rewrite_ids_impl(condition, scope_rewrites),
+                if_true: self.rewrite_ids_impl(if_true, scope_rewrites),
+                if_false: self.rewrite_ids_impl(if_false, scope_rewrites),
+            })),
         }
     }
 
@@ -283,11 +332,14 @@ mod tests {
             let parse_tree = parse_result.next().unwrap();
             let rewrites = BTreeMap::new();
             let unique_scope = Rc::new(RefCell::new(-1));
-            let ast =
-                Box::new(crate::parser::parse(parse_tree, &rewrites, unique_scope, true).unwrap());
+            let ast = Box::new(
+                crate::parser::parse(parse_tree, &rewrites, Rc::clone(&unique_scope), true)
+                    .unwrap(),
+            );
 
             let mut executor = Executor {
                 variables: HashMap::new(),
+                next_unique_scope: *unique_scope.borrow(),
             };
             let actual = executor.fully_evaluate(ast);
             let stringified = match actual {
