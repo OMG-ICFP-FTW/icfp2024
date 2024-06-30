@@ -208,7 +208,32 @@ class Node:
         self.supdate(nodes)
         self.supdate([rep])
         return self.replace(rep)
+
+    def all_nodes(self):
+        s = {id(self): self}
+        if self.children:
+            for child in self.children:
+                if id(child) not in s:
+                    s.update(child.all_nodes())
+        return s
+
+    def dotedges(self):
+        s = set()
+        for node in self.all_nodes().values():
+            if node.children:
+                for child in node.children:
+                    s.add(f"id{id(node)} -> id{id(child)};\n")
+                    s.update(child.dotedges())
+            if node.parent:
+                s.add(f"id{id(node)} -> id{id(node.parent)} [color=red];\n")
+        return s
     
+    def dotnodes(self):
+        s = set()
+        for node in self.all_nodes().values():
+            s.add(f"id{id(node)} [label=\"{node.dotlabel()}\"];\n")
+        return s
+
     def dotlabel(self):
         s = escape(self.token)
         if self.indicator == 'I':
@@ -217,21 +242,27 @@ class Node:
             s += f" == ({decode(self.asstr())})"
         return s
 
-    def dotinner(self):
-        s = f"id{id(self)} [label=\"{self.dotlabel()}\"];\n"
-        if self.children:
-            for child in self.children:
-                s += f"id{id(self)} -> id{id(child)};\n"
-                s += child.dotinner()
-        if self.parent:
-            s += f"id{id(self)} -> id{id(self.parent)} [color=red];\n"
-        return s
+    # def dotinner(self):
+    #     s = f"id{id(self)} [label=\"{self.dotlabel()}\"];\n"
+    #     if self.children:
+    #         for child in self.children:
+    #             s += f"id{id(self)} -> id{id(child)};\n"
+    #             s += child.dotinner()
+    #     if self.parent:
+    #         s += f"id{id(self)} -> id{id(self.parent)} [color=red];\n"
+    #     return s
 
-    def dot(self):
+    def dotinner(self):
+        return '\n'.join(self.dotnodes()) + '\n'.join(self.dotedges())
+
+    def dot(self, filename='/tmp/dot.dot'):
+        assert filename.endswith(".dot"), filename
         s = "digraph {\n" + self.dotinner() + "}\n"
-        with open('/tmp/dot.dot', 'w') as f:
+        with open(filename, 'w') as f:
             f.write(s)
-        print("Wrote dot to /tmp/dot.dot")
+        svgfile = filename[:-4] + ".svg"
+        os.system(f"dot -Tsvg {filename} -o {svgfile}")
+        print("Wrote dot to", filename, "and svg to", svgfile)
 
 
 def parse(tokens):
@@ -400,5 +431,10 @@ s = 'B. SF B$ B$ L" B$ L" B$ L# B$ v" B$ v# v# L# B$ v" B$ v# v# L$ L# ? B= v# I
 
 tokens = s.strip().split()
 tree = parse(tokens)
-# step(tree)
-tree.dot()
+tree.dot('/tmp/step0.dot')
+step(tree)
+tree.dot('/tmp/step1.dot')
+step(tree)
+tree.dot('/tmp/step2.dot')
+step(tree)
+tree.dot('/tmp/step3.dot')
