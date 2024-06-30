@@ -30,7 +30,11 @@ struct Args {
 enum Command {
     Parse,
     Debug,
-    Step { iterations: i64 },
+    Step {
+        iterations: i64,
+        #[arg(long, default_value_t = false)]
+        no_show_vars: bool,
+    },
     Run,
 }
 
@@ -66,7 +70,10 @@ fn main() {
         Command::Debug => {
             println!("AST: {:#?}", &ast);
         }
-        Command::Step { iterations } => {
+        Command::Step {
+            iterations,
+            no_show_vars,
+        } => {
             let mut executor = rust_parser::executor::Executor {
                 variables: HashMap::new(),
                 next_unique_scope: *unique_scope.borrow(),
@@ -77,11 +84,13 @@ fn main() {
                 next = executor.step(next);
                 i += 1;
             }
-            println!("Variables:");
-            let mut vars: Vec<(&i64, &Box<Expr>)> = executor.variables.iter().collect();
-            vars.sort_by(|first, second| second.partial_cmp(first).unwrap());
-            for (k, v) in vars {
-                println!("V{}: {}", k, v)
+            if !no_show_vars {
+                println!("Variables:");
+                let mut vars: Vec<(&i64, &Box<Expr>)> = executor.variables.iter().collect();
+                vars.sort_by(|first, second| second.partial_cmp(first).unwrap());
+                for (k, v) in vars {
+                    println!("V{}: {}", k, v)
+                }
             }
             println!("AST: {}", &next);
         }
