@@ -2,7 +2,6 @@
 # %%
 import os
 from dataclasses import dataclass, field
-from PIL import Image, ImageDraw
 
 
 @dataclass
@@ -71,33 +70,35 @@ class Level:
         for move in moves:
             self.move(move)
 
-    def render(self):
+    def render_svg(self):
         minx, miny, maxx, maxy = self.extents()
         width = maxx - minx + 1
         height = maxy - miny + 1
         assert width < 1000 and height < 1000, f"too big {width} x {height}"
-        # Create a blank image
-        img = Image.new('RGB', (width, height), 'black')
-        draw = ImageDraw.Draw(img)
-        # Draw the stars
-        stars = [(x - minx, y - miny) for x, y in self.stars]
-        draw.point(stars, fill=(255, 255, 255, 255))
-        # Draw the trajectory
-        path = [(x - minx, y - miny) for x, y in self.path]
-        draw.point(path, fill=(255, 0, 0, 100))
-        # Draw the spaceship
-        ship = [(self.px - minx, self.py - miny)]
-        draw.point(ship, fill=(0, 0, 255, 100))
-        return img
 
-    def show(self, big=400):
-        img = self.render()
-        if img.width < big or img.height < big:
-            scale = big // max(img.width, img.height)
-            size = (img.width * scale, img.height * scale)
-            display(img.resize(size))
-        display(img)
+        svg = f'<svg width="{width}" height="{height}" xmlns="http://www.w3.org/2000/svg">\n'
+        
+        # Draw the stars
+        for x, y in self.stars:
+            svg += f'  <circle cx="{x - minx}" cy="{y - miny}" r="1" fill="black" />\n'
+        
+        # Draw the trajectory
+        if self.path:
+            path_points = " ".join([f"{x - minx},{y - miny}" for x, y in self.path])
+            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="1" />\n'
+        
+        # Draw the spaceship
+        svg += f'  <circle cx="{self.px - minx}" cy="{self.py - miny}" r="2" fill="blue" />\n'
+        
+        svg += '</svg>'
+        return svg
+
+    def save_svg(self, filename):
+        svg = self.render_svg()
+        with open(filename, 'w') as f:
+            f.write(svg)
+        print(f"SVG saved to {filename}")
 
 
 level = Level.load(3)
-level.show()
+level.save_svg("level3.svg")
