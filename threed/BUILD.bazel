@@ -25,3 +25,12 @@ py_binary(
         ":threedlang",
     ]
 )
+
+py_binary(
+    name = "submit",
+    main = "submit.py",
+    srcs = ["submit.py"],
+    deps = [
+        "//icfp_lang:icfp_py",
+    ]
+)

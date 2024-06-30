@@ -191,7 +191,10 @@ class Evaluator(object):
                     if self.check_arg_num(x-1, y) and self.check_arg_num(x, y-1):
                         v1 = g.read(t, x-1, y).val
                         v2 = g.read(t, x, y-1).val
-                        s = Atom(ty='N', val= v1%v2)
+                        vm = v1%v2
+                        if v1 < 0:
+                            vm = -vm
+                        s = Atom(ty='N', val= vm)
                         writes.append((nt, x+1, y, s))
                         writes.append((nt, x, y+1, s))
                         removes.append((nt, x-1, y))
