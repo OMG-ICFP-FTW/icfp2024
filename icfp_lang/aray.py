@@ -46,14 +46,18 @@ assert decode("SB%,,/}Q/2,$_") == "Hello World!", decode("SB%,,/}Q/2,$_")
 
 # %% cache requests with the server
 
-def request(s, force=False):
-    assert isinstance(s, str), f"Expected string, got {type(s)}"
-    assert not s.startswith("S"), "Send bare string not encoded"
-    data = encode(s)
+def request(s, force=False, nocode=False):
+    if nocode:
+        data = s
+    else:
+        assert isinstance(s, str), f"Expected string, got {type(s)}"
+        assert not s.startswith("S"), "Send bare string not encoded"
+        data = encode(s)
     filename = hashlib.sha256(data.encode()).hexdigest()
     filepath = os.path.join(cache_path, filename)
     if force or not os.path.exists(filepath) and not force:
         time.sleep(5)
+        print("posting")
         response = requests.post(post_addr, headers=auth, data=data)
         response.raise_for_status()
         decoded = decode(response.text)
@@ -73,13 +77,23 @@ lm_cache_path = '../problems/lambdaman/'
 # result = request('get lambdaman', force=True)
 # with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
 #     file.write(result['decoded'])
-for i in range(1, 22):
-    path = f'../problems/lambdaman/solution{i}.txt'
+# for i in range(1, 22):
+#     path = f'../problems/lambdaman/solution{i}.txt'
+#     if os.path.exists(path):
+#         with open(path, 'r') as file:
+#             solution = file.read().strip()
+#     msg = f"solve lambdaman{i} {solution}"
+#     result = request(msg)
+#     print(result['decoded'])
+
+# %%
+for i in [6]:
+    print("trying 6")
+    path = f'../problems/lambdaman/solution{i}.icfp'
     if os.path.exists(path):
         with open(path, 'r') as file:
             solution = file.read().strip()
-    msg = f"solve lambdaman{i} {solution}"
-    result = request(msg)
+    result = request(solution, nocode=True)
     print(result['decoded'])
 
 # # # %% Get spaceship info

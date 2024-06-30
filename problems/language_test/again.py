@@ -52,6 +52,10 @@ def encode(s):
     return s.translate(encode_trans)
 
 
+def escape(s):
+    return s.replace('"', '\\"')
+
+
 
 @dataclass
 class Node:
@@ -204,6 +208,30 @@ class Node:
         self.supdate(nodes)
         self.supdate([rep])
         return self.replace(rep)
+    
+    def dotlabel(self):
+        s = escape(self.token)
+        if self.indicator == 'I':
+            s += f" == ({self.asint()})"
+        elif self.indicator == 'S':
+            s += f" == ({decode(self.asstr())})"
+        return s
+
+    def dotinner(self):
+        s = f"id{id(self)} [label=\"{self.dotlabel()}\"];\n"
+        if self.children:
+            for child in self.children:
+                s += f"id{id(self)} -> id{id(child)};\n"
+                s += child.dotinner()
+        if self.parent:
+            s += f"id{id(self)} -> id{id(self.parent)} [color=red];\n"
+        return s
+
+    def dot(self):
+        s = "digraph {\n" + self.dotinner() + "}\n"
+        with open('/tmp/dot.dot', 'w') as f:
+            f.write(s)
+        print("Wrote dot to /tmp/dot.dot")
 
 
 def parse(tokens):
@@ -226,6 +254,7 @@ def parse(tokens):
 
 def step(node):
     """ Single step of evaluation, returns False done """
+    print("Stepping at node", node.token, "id", id(node))
     # Children first
     if node.children:
         for child in node.children:
@@ -365,18 +394,11 @@ def post(s):
     response.raise_for_status()
     return response.text
 
-s = post('get lambdaman6')
+# s = post('get lambdaman6')
 # s = open('language_test.txt').read()
+s = 'B. SF B$ B$ L" B$ L" B$ L# B$ v" B$ v# v# L# B$ v" B$ v# v# L$ L# ? B= v# I" v" B. v" B$ v$ B- v# I" Sl I#,'
 
 tokens = s.strip().split()
 tree = parse(tokens)
-tree.check()
-print("start")
-print(tree.dump())
-print("size", tree.size())
-while step(tree):
-    print("step")
-    tree.check()
-    print("size", tree.size())
-    print(tree.dump())
-print(tree.dump())
+# step(tree)
+tree.dot()

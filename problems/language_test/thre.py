@@ -486,5 +486,3 @@ def encode(s):
 if tree.indicator == 'S':
     print(decode(tree.body))
 
-
-# %%
