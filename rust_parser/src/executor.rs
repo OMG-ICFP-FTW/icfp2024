@@ -220,17 +220,22 @@ impl Executor {
         if_true: Box<Expr>,
         if_false: Box<Expr>,
     ) -> Box<Expr> {
-        match self.fully_evaluate(condition) {
-            Value::Bool(val) => {
+        match *condition {
+            Expr::Value(Value::Bool(val)) => {
                 if val {
                     if_true
                 } else {
                     if_false
                 }
             }
-            _ => {
+            Expr::Value(_) => {
                 panic!("Found non-boolean terminal")
             }
+            condition @ _ => Box::new(Expr::If(If {
+                condition: self.step(Box::new(condition)),
+                if_true,
+                if_false,
+            })),
         }
     }
 }
