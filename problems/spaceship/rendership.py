@@ -74,7 +74,6 @@ class Level:
         minx, miny, maxx, maxy = self.extents()
         content_width = maxx - minx + 1
         content_height = maxy - miny + 1
-        assert content_width < 1000 and content_height < 1000, f"too big {content_width} x {content_height}"
 
         # Calculate the new dimensions with extra space
         total_width = content_width * 3
