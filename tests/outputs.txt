@@ -1,9 +1,10 @@
-# Binary Operators
+# Unary Operators
 -3
 false
 15818151
 "test"
 5
+# Binary Operators
 1
 6
 -3
@@ -16,3 +17,10 @@ false
 "test"
 "tes"
 "t"
+# If
+true
+false
+"no"
+# Lambda
+12
+"Hello World!"

@@ -1,8 +1,9 @@
-# Binary Operators
+# Unary Operators
 U- I$
 U! T
 U# S4%34
 U$ I4%34
+# Binary Operators
 B+ I# I$
 B- I$ I#
 B* I$ I#
@@ -16,3 +17,9 @@ B& T F
 B. S4% S34
 BT I$ S4%34
 BD I$ S4%34
+# If
+? T T F
+? F T F
+? B> I# I$ S9%3 S./
+# Lambda
+B$ L# B$ L" B+ v" v" B* I$ I# v8
