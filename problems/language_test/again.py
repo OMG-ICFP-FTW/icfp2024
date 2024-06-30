@@ -6,6 +6,7 @@ import random
 import math
 import time
 import requests
+import os
 
 
 def truncdiv(a, b):
@@ -221,6 +222,8 @@ def step(node):
         left, right = node.children
         # Application
         if node.body in '$':
+            if not left.indicator == 'L':
+                return False
             expression, = left.children
             old_var = 'v' + left.body
             new_var = 'v' + str(random.randint(1_000_000_000, 9_999_999_999))
@@ -229,6 +232,8 @@ def step(node):
             return node.replace(expression)
         # Arithmetic
         if node.body in '+-*/%':
+            if not left.isint() or not right.isint():
+                return False
             a, b = left.asint(), right.asint()
             if node.token == 'B+':
                 result = a + b
@@ -310,17 +315,16 @@ def evaluate(node):
     return node
 
 
-s = open('language_test.txt').read()
+# s = open('language_test.txt').read()
 
-tokens = s.strip().split()
-tree = parse(tokens)
-tree = evaluate(tree)
+# tokens = s.strip().split()
+# tree = parse(tokens)
+# tree = evaluate(tree)
 
-if tree.indicator == 'S':
-    print(decode(tree.body))
+# if tree.indicator == 'S':
+#     print(decode(tree.body))
 
 
-# %%
 
 post_addr = "https://boundvariable.space/communicate"
 # Authorization header
@@ -331,45 +335,21 @@ assert auth.startswith("Authorization: Bearer ")
 # convert to dict for requests
 auth = {"Authorization": auth.lstrip("Authorization: ").strip()}
 
-def post(s, filename=None):
+def post(s):
     assert isinstance(s, str), f"Expected string, got {type(s)}"
-    assert not s.startswith("S"), "Send bare string not encoded"
+    assert not s.startswith("S"), f"Don't pre-encode"
     data = 'S' + encode(s)
     response = requests.post(post_addr, headers=auth, data=data)
     response.raise_for_status()
-    decoded = decode(response.text[1:].strip())
-    if filename:
-        with open(filename, 'w') as file:
-            file.write(decoded)
-    return decoded
+    return response.text
 
-result = post('get index', '../index/index.txt')
-print(result)
+s = post('get efficiency1')
 
-# %% lambdaman
-post('get lambdaman', '../lambdaman/info.txt')
-for i in range(1, 22):
-    time.sleep(4)
-    print(f"Getting lambdaman {i}")
-    post(f'get lambdaman{i}', f'../lambdaman/level{i}.txt')
 
-# %% spaceship
-post('get spaceship', '../spaceship/info.txt')
-for i in range(1, 26):
-    time.sleep(4)
-    print(f"Getting spaceship {i}")
-    post(f'get spaceship{i}', f'../spaceship/level{i}.txt')
-
-# %% 3d
-post('get 3d', '../3d/info.txt')
-for i in range(1, 13):
-    time.sleep(4)
-    print(f"Getting 3d {i}")
-    post(f'get 3d{i}', f'../3d/level{i}.txt')
-
-# %% efficiency
-post('get efficiency', '../efficiency/info.txt')
-for i in range(1, 14):
-    time.sleep(4)
-    print(f"Getting efficiency {i}")
-    post(f'get efficiency{i}', f'../efficiency/level{i}.txt')
+print(s)
+tokens = s.strip().split()
+print(tokens)
+tree = parse(tokens)
+print(tree.dump())
+tree = evaluate(tree)
+print(tree.dump())
