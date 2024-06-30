@@ -75,32 +75,32 @@ class Level:
         content_width = maxx - minx + 1
         content_height = maxy - miny + 1
 
-        # Calculate the new dimensions with extra space
-        total_width = content_width * 3
-        total_height = content_height * 3
-        offset_x = content_width
-        offset_y = content_height
+        # Determine the scaling factor to fit the content in a 60x60 area
+        scale = 600 / max(content_width, content_height)
 
-        stroke_width = max(total_width, total_height) / 100
-        star_size = stroke_width * 2
-        ship_size = stroke_width * 2
-        print('stroke_width', stroke_width)
-        print('star_size', star_size)
-        print('ship_size', ship_size)
+        def transform(x, y):
+            x_scaled = (x - minx) * scale
+            y_scaled = (y - miny) * scale
+            return x_scaled + 200, y_scaled + 200
 
-        svg = f'<svg width="{total_width}" height="{total_height}" xmlns="http://www.w3.org/2000/svg">\n'
+        svg = '<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">\n'
+        
+        # Draw a border around the content area
+        svg += '  <rect x="200" y="200" width="600" height="600" fill="none" stroke="gray" stroke-width="5" />\n'
         
         # Draw the stars
         for x, y in self.stars:
-            svg += f'  <circle cx="{x - minx + offset_x}" cy="{y - miny + offset_y}" r="{star_size}" fill="black" />\n'
+            cx, cy = transform(x, y)
+            svg += f'  <circle cx="{cx:.1f}" cy="{cy:.1f}" r="3" fill="black" />\n'
         
         # Draw the trajectory
         if self.path:
-            path_points = " ".join([f"{x - minx + offset_x},{y - miny + offset_y}" for x, y in self.path])
-            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="{stroke_width}" />\n'
+            path_points = " ".join([f"{transform(x, y)[0]:.1f},{transform(x, y)[1]:.1f}" for x, y in self.path])
+            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="3" stroke-opacity="0.5"/>\n'
         
         # Draw the spaceship
-        svg += f'  <circle cx="{self.px - minx + offset_x}" cy="{self.py - miny + offset_y}" r="{ship_size}" fill="blue" />\n'
+        ship_x, ship_y = transform(self.px, self.py)
+        svg += f'  <circle cx="{ship_x:.1f}" cy="{ship_y:.1f}" r="50" fill="blue" fill-opacity="0.5"/>\n'
         
         svg += '</svg>'
         return svg
