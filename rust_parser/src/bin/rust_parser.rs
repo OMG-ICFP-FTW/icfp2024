@@ -1,7 +1,10 @@
 use std::fs;
 use std::path;
 
+use std::cell::RefCell;
+use std::collections::BTreeMap;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use clap::Parser;
 
@@ -23,6 +26,7 @@ struct Args {
 #[derive(clap::Subcommand, Debug)]
 enum Command {
     Parse,
+    Debug,
     Step { iterations: i64 },
 }
 
@@ -38,7 +42,9 @@ fn main() {
         .unwrap();
 
         let parse_tree = parse_result.next().unwrap();
-        rust_parser::parser::parse(parse_tree).unwrap()
+        let rewrites = BTreeMap::new();
+        let unique_scope = Rc::new(RefCell::new(-1));
+        rust_parser::parser::parse(parse_tree, &rewrites, unique_scope).unwrap()
     } else {
         serde_json::from_str(&input_icfp).unwrap()
     };
@@ -46,6 +52,9 @@ fn main() {
     match args.command {
         Command::Parse => {
             println!("AST: {}", &ast);
+        }
+        Command::Debug => {
+            println!("AST: {:#?}", &ast);
         }
         Command::Step { iterations } => {
             let mut executor = rust_parser::executor::Executor {

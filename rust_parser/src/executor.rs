@@ -201,6 +201,10 @@ impl Executor {
 mod tests {
     use std::fs;
 
+    use std::cell::RefCell;
+    use std::collections::BTreeMap;
+    use std::rc::Rc;
+
     use super::*;
 
     lazy_static! {
@@ -232,7 +236,9 @@ mod tests {
             .unwrap();
 
             let parse_tree = parse_result.next().unwrap();
-            let ast = Box::new(crate::parser::parse(parse_tree).unwrap());
+            let rewrites = BTreeMap::new();
+            let unique_scope = Rc::new(RefCell::new(-1));
+            let ast = Box::new(crate::parser::parse(parse_tree, &rewrites, unique_scope).unwrap());
 
             let mut executor = Executor {
                 variables: HashMap::new(),
