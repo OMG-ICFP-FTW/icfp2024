@@ -165,6 +165,8 @@ class Level:
         print(f"Saved solution {self.i}, score", self.score)
 
 
+Level.load(6).solve().save()
+
 # %% run the levels
 while True:
     for i in range(1, 22):

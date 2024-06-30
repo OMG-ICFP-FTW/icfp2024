@@ -63,24 +63,24 @@ def request(s, force=False):
         return json.load(file)
 
 # %% Get index
-result = request('get index', force=True)
-with open('../problems/index/index.txt', 'w') as file:
-    file.write(result['decoded'])
+# result = request('get index', force=True)
+# with open('../problems/index/index.txt', 'w') as file:
+#     file.write(result['decoded'])
 
-# # %%  Get lambdaman info and send solutions
-# lm_cache_path = '../problems/lambdaman/'
+# %%  Get lambdaman info and send solutions
+lm_cache_path = '../problems/lambdaman/'
 # os.makedirs(lm_cache_path, exist_ok=True)
 # result = request('get lambdaman', force=True)
 # with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
 #     file.write(result['decoded'])
-# for i in range(1, 22):
-#     path = f'../problems/lambdaman/solution{i}.txt'
-#     if os.path.exists(path):
-#         with open(path, 'r') as file:
-#             solution = file.read().strip()
-#     msg = f"solve lambdaman{i} {solution}"
-#     result = request(msg)
-#     print(result['decoded'])
+for i in range(1, 22):
+    path = f'../problems/lambdaman/solution{i}.txt'
+    if os.path.exists(path):
+        with open(path, 'r') as file:
+            solution = file.read().strip()
+    msg = f"solve lambdaman{i} {solution}"
+    result = request(msg)
+    print(result['decoded'])
 
 # # # %% Get spaceship info
 # ss_cache_path = '../problems/spaceship/'
@@ -119,14 +119,14 @@ with open('../problems/index/index.txt', 'w') as file:
 #         with open(path, 'w') as file:
 #             file.write(result['decoded'])
 
-# %% echo
-done = False
-while not done:
-    result = request(f'echo {hash(random.randbytes(1024))}', force=True)
-    print(result['decoded'])
-    if "You scored some points" not in result['decoded']:
-        done = True
-    time.sleep(5)
+# # %% echo
+# done = False
+# while not done:
+#     result = request(f'echo {hash(random.randbytes(1024))}', force=True)
+#     print(result['decoded'])
+#     if "You scored some points" not in result['decoded']:
+#         done = True
+#     time.sleep(5)
 
 
 # # %% get language_test info

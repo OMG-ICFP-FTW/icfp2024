@@ -73,6 +73,33 @@ class Node:
     def body(self):
         return self.token[1:]
     
+    def size(self):
+        s = 1
+        if self.children:
+            for child in self.children:
+                s += child.size()
+        return s
+    
+    def check(self):
+        assert self is not self.parent, f"self {self.token} self.parent {self.parent.token}"
+        if self.indicator in 'TFvIS':
+            assert self.children is None, f"Expected no children, got {type(self.children)} self {self.token}"
+        if self.children:
+            if self.indicator in 'UL':
+                assert len(self.children) == 1, f"Expected 1 child, got {len(self.children)} self {self.token}"
+            elif self.indicator in 'B':
+                assert len(self.children) == 2, f"Expected 2 children, got {len(self.children)} self {self.token}"
+            elif self.indicator in '?':
+                assert len(self.children) == 3, f"Expected 3 children, got {len(self.children)} self {self.token}"
+            else:
+                raise ValueError(f"Unknown indicator {self.indicator}")
+            assert isinstance(self.children, list), f"Expected children list, got {type(self.children)} self {self.token}"
+            for child in self.children:
+                assert child is not self, f"child {child.token} self {self.token}"
+                assert child is not self.parent, f"child {child.token} self.parent {self.parent.token}"
+                assert child.parent == self, f"child {child.token} child.parent {child.parent.token} id {id(child.parent)} parent {self.token} id {id(self)}"
+                child.check()
+    
     def isint(self):
         if self.indicator == 'I':
             return True
@@ -137,7 +164,7 @@ class Node:
         if self.substitutions:
             s += " {"
             for key, value in self.substitutions.items():
-                s += f" {key}=<{value.dump()}>,"
+                s += f" {key}=<{value.indicator}>,"
             s += "}"
         return s
 
@@ -161,10 +188,16 @@ class Node:
             for value in self.substitutions.values():
                 value.rename(a, b)
 
-    def replace(self, node):
+    def replace(self, node, parent=None):
+        print(f"replacing {self.token} id {id(self)} with {node.token} id {id(node)} values")
         self.substitutions = node.substitutions
         self.children = node.children
+        if self.children:
+            for child in self.children:
+                child.parent = self
         self.token = node.token
+        if parent:
+            self.parent = parent
         return True  # returned for convenience with step logic
     
     def squeeze(self, rep, nodes):
@@ -234,7 +267,7 @@ def step(node):
         if node.body in '+-*/%':
             if not left.isint() or not right.isint():
                 return False
-            a, b = left.asint(), right.asint()
+            a, b = left.asint(), right.asint() 
             if node.token == 'B+':
                 result = a + b
             elif node.token == 'B-':
@@ -315,17 +348,6 @@ def evaluate(node):
     return node
 
 
-# s = open('language_test.txt').read()
-
-# tokens = s.strip().split()
-# tree = parse(tokens)
-# tree = evaluate(tree)
-
-# if tree.indicator == 'S':
-#     print(decode(tree.body))
-
-
-
 post_addr = "https://boundvariable.space/communicate"
 # Authorization header
 auth_path = '../../misc/SUBMISSION_HEADER.txt'
@@ -343,13 +365,18 @@ def post(s):
     response.raise_for_status()
     return response.text
 
-s = post('get efficiency1')
+s = post('get lambdaman6')
+# s = open('language_test.txt').read()
 
-
-print(s)
 tokens = s.strip().split()
-print(tokens)
 tree = parse(tokens)
+tree.check()
+print("start")
 print(tree.dump())
-tree = evaluate(tree)
+print("size", tree.size())
+while step(tree):
+    print("step")
+    tree.check()
+    print("size", tree.size())
+    print(tree.dump())
 print(tree.dump())
