@@ -93,8 +93,9 @@ class Level:
         self.visited.add(self.pos)
         self.solution.append(move)
 
-    def nav(self, dst, max_tries=100000):
+    def nav(self, dst, max_tries=1000000):
         """ Navigate to a given point, arriving at low velocity """
+        original = self.pos
         for _ in range(max_tries):
             if self.pos == dst:
                 return
@@ -122,14 +123,17 @@ class Level:
                     move = 5
             assert move is not None, f"Could not navigate to {dst} from {self.pos}"
             self.move(move)
-        raise ValueError("Could not navigate to destination")
+        raise ValueError(f"Could not navigate to destination {dst} from {original}")
 
     def next_point(self, choices=3):
         remaining = list(self.remaining)
-        # sort by distance to self.next
-        remaining.sort(key=lambda p: abs(p[0] - self.next[0]) + abs(p[1] - self.next[1]))
-        # pick the closest for now
-        return random.choice(remaining[:choices])
+        # get the minimum distance to the next point
+        distance = lambda p: abs(p[0] - self.next[0]) + abs(p[1] - self.next[1])
+        # get all points with the minimum distance
+        min_dist = min(map(distance, remaining))
+        remaining = list(filter(lambda p: distance(p) == min_dist, remaining))
+        # return a random point from the remaining points
+        return random.choice(remaining)
 
     def route(self, timeout=10, current_best=None, choices=3):
         start = time.time()
@@ -138,9 +142,15 @@ class Level:
             p = self.next_point(choices)
             self.nav(p)
             if time.time() > tick + 10:
-                frac = len(list(self.remaining)) / len(self.points)
-                print(f"TICK: Score: {self.score} Top speed: {self.top_speed} Frac: {frac:0.2f}")
+                numera = len(list(self.remaining))
+                denome = len(self.points)
+                frac = numera / denome
+                eff = (denome - numera) / len(self.solution)
+                print(f"TICK: Score: {self.score} Top speed: {self.top_speed} Frac: {frac:0.2f} ({numera}/{denome}) Eff: {eff:0.2f}")
                 tick = time.time()
+                with open('/tmp/partial', 'w') as f:
+                    f.write("".join(map(str, self.solution)))
+                print("Partial solution saved to /tmp/partial")
             if time.time() > start + timeout:
                 print("Timeout")
                 exit(1)
@@ -150,9 +160,13 @@ class Level:
                     exit(1)
 
 
-def main(filename, visit=None, output=None, max_speed=50, timeout=10, current_best=None, choices=3):
+def main(filename, visit=None, output=None, max_speed=50, timeout=10, current_best=None, choices=3, partial=None):
     level = Level.load(filename, visit)
     level.max_speed = max_speed
+    if partial is not None and os.path.exists(partial):
+        with open(partial) as f:
+            for move in f.read().strip():
+                level.move(int(move))
     level.route(timeout=timeout, current_best=current_best, choices=choices)
     print("Top speed:", level.top_speed, "max speed:", level.max_speed, "solution length:", len(level.solution))
 
@@ -178,13 +192,14 @@ if __name__ == '__main__':
     parser.add_argument('-l','--level', help='Source file with grid', required=True)
     parser.add_argument('-v','--visit', default=None, help='Pre-generated visit order file')
     parser.add_argument('-o','--output', default=None, help='Output file')
-    parser.add_argument('-m','--max-speed', default=50, type=int, help='Max speed')
-    parser.add_argument('-t','--timeout', default=10, type=int, help='Timeout')
-    parser.add_argument('-c','--choices', default=3, type=int, help='Number of choices to consider')
+    parser.add_argument('-m','--max-speed', default=2, type=int, help='Max speed')
+    parser.add_argument('-t','--timeout', default=10000, type=int, help='Timeout')
+    parser.add_argument('-c','--choices', default=1, type=int, help='Number of choices to consider')
+    parser.add_argument('-p','--partial', default=None, help='Partial solution')
     args = parser.parse_args()
     if os.path.exists(args.output):
         with open(args.output) as f:
             score = len(f.read().strip())
     else:
         score = None
-    main(args.level, args.visit, args.output, args.max_speed, args.timeout, current_best=score, choices=args.choices)
+    main(args.level, args.visit, args.output, args.max_speed, args.timeout, current_best=score, choices=args.choices, partial=args.partial)

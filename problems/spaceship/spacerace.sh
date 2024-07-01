@@ -4,11 +4,11 @@
 
 # iterate over max_speeds 1 through 50 inclusive
 
-timeout=1000
+timeout=10000
 
-levels="23 24 25"
+levels="23"
 
-for max_speed in {2..5}
+for max_speed in {2..2}
 do
     echo "speed set to $max_speed"
     for i in $levels
