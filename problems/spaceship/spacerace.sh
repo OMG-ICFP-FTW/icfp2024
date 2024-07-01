@@ -9,7 +9,7 @@ timeout=1000
 for max_speed in {1..5}
 do
     echo "speed set to $max_speed"
-    for i in {19..19}
+    for i in {12..13}
     do
         echo "level $i speed $max_speed timeout $timeout"
         for choices in {1..10}
