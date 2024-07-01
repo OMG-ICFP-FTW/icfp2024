@@ -383,41 +383,49 @@ def ept(s):
 # assert ept("? B> I# I$ S9%3 S./") == 'no'
 # assert ept("""B$ B$ L" B$ L# B$ v" B$ v# v# L# B$ v" B$ v# v# L" L# ? B= v# I! I" B$ L$ B+ B$ v" v$ B$ v" v$ B- v# I" I%""") == 16
 
-ept('B$ L# B$ L" B+ v" v" B* I$ I# v8')
+# ept('B$ L# B$ L" B+ v" v" B* I$ I# v8')
+
+if __name__ == '__main__':
+    import sys
+    s = sys.stdin.read().strip()
+    parsed, remainder = parse(tokenize(s))
+    assert remainder == [], f"Expected empty remainder, got {remainder}"
+    print(evaluate(parsed))
+
 
 
 # %%
-import os
-import requests
+# import os
+# import requests
 
-post_addr = "https://boundvariable.space/communicate"
-# Authorization header
-auth_path = '../../misc/SUBMISSION_HEADER.txt'
-with open(auth_path, 'r') as file:
-    auth = file.read()
-assert auth.startswith("Authorization: Bearer ")
-# convert to dict for requests
-auth = {"Authorization": auth.lstrip("Authorization: ").strip()}
+# post_addr = "https://boundvariable.space/communicate"
+# # Authorization header
+# auth_path = '../../misc/SUBMISSION_HEADER.txt'
+# with open(auth_path, 'r') as file:
+#     auth = file.read()
+# assert auth.startswith("Authorization: Bearer ")
+# # convert to dict for requests
+# auth = {"Authorization": auth.lstrip("Authorization: ").strip()}
 
-path = 'language_test.txt'
-if not os.path.exists(path):
-    data = 'S' + encode('get language_test')
-    response = requests.post(post_addr, headers=auth, data=data)
-    response.raise_for_status()
-    language_test = response.text.strip()
-    with open(path, 'w') as file:
-        file.write(language_test)
-with open(path, 'r') as file:
-    language_test = file.read()
+# path = 'language_test.txt'
+# if not os.path.exists(path):
+#     data = 'S' + encode('get language_test')
+#     response = requests.post(post_addr, headers=auth, data=data)
+#     response.raise_for_status()
+#     language_test = response.text.strip()
+#     with open(path, 'w') as file:
+#         file.write(language_test)
+# with open(path, 'r') as file:
+#     language_test = file.read()
 
-print("LANGUAGE TEST")
-print(language_test)
-tokens = tokenize(language_test)
-print("TOKENS")
-print(tokens)
-parsed, remainder = parse(tokens)
-print("PARSED")
-print(parsed, remainder)
-evaluated = evaluate(parsed)
-print("EVALUATED")
-print(evaluated)
+# print("LANGUAGE TEST")
+# print(language_test)
+# tokens = tokenize(language_test)
+# print("TOKENS")
+# print(tokens)
+# parsed, remainder = parse(tokens)
+# print("PARSED")
+# print(parsed, remainder)
+# evaluated = evaluate(parsed)
+# print("EVALUATED")
+# print(evaluated)
