@@ -8,30 +8,30 @@ Now the challenge is the following: given a list of squares to be visited, find 
 
 The following levels are available:
 * [spaceship1] Your score: 5. Best score: 5.
-* [spaceship2] Your score: 53. Best score: 49.
-* [spaceship3] Your score: 29. Best score: 10.
-* [spaceship4] Your score: 5616. Best score: 99.
-* [spaceship5] Your score: 7916. Best score: 116.
-* [spaceship6] Your score: 8802. Best score: 117.
-* [spaceship7] Your score: 1755. Best score: 94.
-* [spaceship8] Your score: 2838. Best score: 90.
-* [spaceship9] Your score: 8174. Best score: 206.
-* [spaceship10] Your score: 41799. Best score: 304.
-* [spaceship11] Best score: 8192.
+* [spaceship2] Your score: 49. Best score: 49.
+* [spaceship3] Your score: 10. Best score: 10.
+* [spaceship4] Your score: 173. Best score: 99.
+* [spaceship5] Your score: 196. Best score: 116.
+* [spaceship6] Your score: 428. Best score: 117.
+* [spaceship7] Your score: 221. Best score: 94.
+* [spaceship8] Your score: 238. Best score: 90.
+* [spaceship9] Your score: 525. Best score: 206.
+* [spaceship10] Your score: 1120. Best score: 304.
+* [spaceship11] Your score: 383798. Best score: 8192.
 * [spaceship12] Best score: 8192.
 * [spaceship13] Best score: 23791.
 * [spaceship14] Your score: 58862. Best score: 137.
 * [spaceship15] Your score: 128. Best score: 39.
-* [spaceship16] Your score: 33781. Best score: 1373.
-* [spaceship17] Your score: 7814. Best score: 411.
-* [spaceship18] Your score: 168150. Best score: 1839.
+* [spaceship16] Your score: 33781. Best score: 1358.
+* [spaceship17] Your score: 854. Best score: 408.
+* [spaceship18] Your score: 115599. Best score: 1765.
 * [spaceship19] Your score: 195183. Best score: 11279.
 * [spaceship20] Your score: 361411. Best score: 2342.
-* [spaceship21] Your score: 364170. Best score: 2394.
-* [spaceship22] Best score: 1136.
-* [spaceship23] Best score: 165298.
-* [spaceship24] Best score: 536002.
-* [spaceship25] Best score: 594346.
+* [spaceship21] Your score: 364170. Best score: 2376.
+* [spaceship22] Your score: 2408. Best score: 1118.
+* [spaceship23] Best score: 152792.
+* [spaceship24] Best score: 481573.
+* [spaceship25] Best score: 513862.
 
 To submit a solution, send an ICFP expression that evaluates to:
 
