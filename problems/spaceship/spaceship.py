@@ -99,27 +99,6 @@ class Level:
         for p in self.points:
             self.nav(p)
 
-#     def solve(self):
-#         while not self.solved:
-#             point = random.choice(list(self.remaining))
-#             self.nav(point)
-#         print(f"Solved level {self.i} in {len(self.solution)} moves")
-#         return self
-
-#     def save(self):
-#         """ Save level solution if better """
-#         assert self.solved and self.score > 0, "Cannot save unsolved level"
-#         path = f"./solution{self.i}.txt"
-#         if os.path.exists(path):
-#             with open(path) as f:
-#                 prev_score = len(f.read().strip())
-#             if self.score >= prev_score:
-#                 return
-#         solution = ''.join(map(str, self.solution))
-#         with open(path, 'w') as f:
-#             f.write(solution)
-#         print(f"Saved solution {self.i}, score", self.score)
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Submit 3d solution from file')
     parser.add_argument('-l','--level', help='Source file with grid', required=True)
