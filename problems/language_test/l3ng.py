@@ -279,15 +279,18 @@ def ept(s):
 
 # ept('B$ L# B$ L" B+ v" v" B* I$ I# v8')
 
-for i in range(1, 26):
-    with open(f"../spaceship/level{i}.icfp", 'r') as file:
-        prog = file.read().strip()
-    tokens = tokenize(prog)
-    parsed, remainder = parse(tokens)
-    assert remainder == [], f"Expected empty remainder, got {remainder}"
-    evaluated = evaluate(parsed)
-    with open(f"../spaceship/level{i}.txt", 'w') as file:
-        file.write(evaluated)
+# for i in range(1, 26):
+#     try:
+#         with open(f"../lambdaman/level{i}.icfp", 'r') as file:
+#             prog = file.read().strip()
+#         tokens = tokenize(prog)
+#         parsed, remainder = parse(tokens)
+#         assert remainder == [], f"Expected empty remainder, got {remainder}"
+#         evaluated = evaluate(parsed)
+#         with open(f"../lambdaman/level{i}.txt", 'w') as file:
+#             file.write(evaluated)
+#     except Exception as e:
+#         print(f"Error on level {i}: {e}")
 
 
 # %%
