@@ -18,6 +18,8 @@ strmap = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'
 def decode(s):
     return ''.join(strmap[ord(c) - 33] for c in s)
 
+def encode(s):
+    return ''.join(chr(strmap.index(c) + 33) for c in s)
 
 assert toint('!') == 0
 assert toint('"') == 1

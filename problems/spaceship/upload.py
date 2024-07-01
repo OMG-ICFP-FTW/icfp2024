@@ -22,6 +22,8 @@ decode_trans = str.maketrans(decode_map)
 
 def request(s):
     data = 'S' + s.translate(encode_trans)
+    with open("/tmp/data", "a") as f:
+        f.write(data + "\n")
     response = requests.post(post_addr, headers=auth, data=data)
     response.raise_for_status()
     return response.text

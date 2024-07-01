@@ -96,28 +96,34 @@ class Level:
     def nav(self, dst, max_tries=1000000):
         """ Navigate to a given point, arriving at low velocity """
         original = self.pos
+        max_speed = self.max_speed
+        # if distance to destination is more than 100,
+        # set max speed to 50
+        # if abs(self.pos[0] - dst[0]) + abs(self.pos[1] - dst[1]) > 100:
+        #     max_speed = 50
+        #     print(f"Setting max speed to {max_speed}, distance to {dst} is {abs(self.pos[0] - dst[0]) + abs(self.pos[1] - dst[1])}")
         for _ in range(max_tries):
             if self.pos == dst:
                 return
             move = None
-            if self.next[0] < dst[0] and self.vel[0] < self.max_speed:
-                if self.next[1] < dst[1] and self.vel[1] < self.max_speed:
+            if self.next[0] < dst[0] and self.vel[0] < max_speed:
+                if self.next[1] < dst[1] and self.vel[1] < max_speed:
                     move = 9
-                elif self.next[1] > dst[1] and self.vel[1] > -self.max_speed:
+                elif self.next[1] > dst[1] and self.vel[1] > -max_speed:
                     move = 3
                 else:
                     move = 6
-            elif self.next[0] > dst[0] and self.vel[0] > -self.max_speed:
-                if self.next[1] < dst[1] and self.vel[1] < self.max_speed:
+            elif self.next[0] > dst[0] and self.vel[0] > -max_speed:
+                if self.next[1] < dst[1] and self.vel[1] < max_speed:
                     move = 7
-                elif self.next[1] > dst[1] and self.vel[1] > -self.max_speed:
+                elif self.next[1] > dst[1] and self.vel[1] > -max_speed:
                     move = 1
                 else:
                     move = 4
             else:
-                if self.next[1] < dst[1] and self.vel[1] < self.max_speed:
+                if self.next[1] < dst[1] and self.vel[1] < max_speed:
                     move = 8
-                elif self.next[1] > dst[1] and self.vel[1] > -self.max_speed:
+                elif self.next[1] > dst[1] and self.vel[1] > -max_speed:
                     move = 2
                 else:
                     move = 5
@@ -126,9 +132,13 @@ class Level:
         raise ValueError(f"Could not navigate to destination {dst} from {original}")
 
     def next_point(self, choices=3):
+        # # HACK
+        # if len(self.solution) == 0:
+        #     # get the point with the highest y value
+        #     return max(self.remaining, key=lambda p: -p[1])
         remaining = list(self.remaining)
-        # get the minimum distance to the next point
-        distance = lambda p: abs(p[0] - self.next[0]) + abs(p[1] - self.next[1])
+        # get the minimum distance
+        distance = lambda p: abs(p[0] - self.pos[0]) + abs(p[1] - self.pos[1])
         # get all points with the minimum distance
         min_dist = min(map(distance, remaining))
         remaining = list(filter(lambda p: distance(p) == min_dist, remaining))
