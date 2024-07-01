@@ -19,17 +19,23 @@ class Level:
     pos: tuple = (0, 0)
     vel: tuple = (0, 0)
     solution: list = field(default_factory=list)
+    max_speed: int = 300
+    top_speed: int = 0
 
     @classmethod
-    def load(cls, point_file, order_file):
+    def from_index(cls, i):
+        return cls.load(f"level{i}.txt")
+
+    @classmethod
+    def load(cls, point_file, order_file=None):
         points = list()
         with open(point_file) as f:
             for line in f.read().strip().splitlines():
                 x, y = map(int, line.strip().split())
                 points.append((x, y))
-
-        with open(order_file) as f:
-            points = list(points[i] for i in map(int, f.read().strip().split(',')))
+        if order_file is not None:
+            with open(order_file) as f:
+                points = list(points[i] for i in map(int, f.read().strip().split(',')))
         return cls(points)
 
     @property
@@ -37,6 +43,8 @@ class Level:
         return self.pos[0] + self.vel[0], self.pos[1] + self.vel[1]
 
     def move(self, move: int):
+        if len(self.solution) > 10_000_000:
+            raise ValueError(f"Too many moves top_speed={self.top_speed}")
         assert 0 < move < 10, f"Invalid move {move}"
         vx, vy = self.vel
         if move == 1:
@@ -63,6 +71,7 @@ class Level:
             vy += 1
         else:
             raise ValueError(f"Invalid move {move}")
+        self.top_speed = max(self.top_speed, abs(vx), abs(vy))
         self.vel = (vx, vy)
         self.pos = (self.pos[0] + vx, self.pos[1] + vy)
         self.solution.append(move)
@@ -72,39 +81,61 @@ class Level:
         for _ in range(max_tries):
             if self.pos == dst:
                 return
-            if self.next[0] < dst[0]:
-                if self.next[1] < dst[1]:
-                    self.move(9)
-                elif self.next[1] > dst[1]:
-                    self.move(3)
+            move = None
+            if self.next[0] < dst[0] and self.vel[0] < self.max_speed:
+                if self.next[1] < dst[1] and self.vel[1] < self.max_speed:
+                    move = 9
+                elif self.next[1] > dst[1] and self.vel[1] > -self.max_speed:
+                    move = 3
                 else:
-                    self.move(6)
-            elif self.next[0] > dst[0]:
-                if self.next[1] < dst[1]:
-                    self.move(7)
-                elif self.next[1] > dst[1]:
-                    self.move(1)
+                    move = 6
+            elif self.next[0] > dst[0] and self.vel[0] > -self.max_speed:
+                if self.next[1] < dst[1] and self.vel[1] < self.max_speed:
+                    move = 7
+                elif self.next[1] > dst[1] and self.vel[1] > -self.max_speed:
+                    move = 1
                 else:
-                    self.move(4)
+                    move = 4
             else:
-                if self.next[1] < dst[1]:
-                    self.move(8)
-                elif self.next[1] > dst[1]:
-                    self.move(2)
+                if self.next[1] < dst[1] and self.vel[1] < self.max_speed:
+                    move = 8
+                elif self.next[1] > dst[1] and self.vel[1] > -self.max_speed:
+                    move = 2
                 else:
-                    self.move(5)
+                    move = 5
+            assert move is not None, f"Could not navigate to {dst} from {self.pos}"
+            self.move(move)
         raise ValueError("Could not navigate to destination")
 
     def route(self):
         for p in self.points:
             self.nav(p)
 
+
+def main(filename, visit=None, output=None):
+    level = Level.load(filename, visit)
+    level.route()
+    print("".join(map(str, level.solution)))
+
+    if output:
+        # check existing solution
+        if os.path.exists(output):
+            # Get existing score
+            with open(output) as f:
+                score = len(f.read().strip())
+            if len(level.solution) >= score:
+                print(f"Existing solution is better: {score}")
+                return
+        # Save new solution
+        with open(output, 'w') as f:
+            f.write("".join(map(str, level.solution)))
+            print(f"Saved solution to {output}")
+
+
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Submit 3d solution from file')
     parser.add_argument('-l','--level', help='Source file with grid', required=True)
-    parser.add_argument('-v','--visit', help='Pre-generated visit order file')
+    parser.add_argument('-v','--visit', default=None, help='Pre-generated visit order file')
+    parser.add_argument('-o','--output', default=None, help='Output file')
     args = parser.parse_args()
-
-    level = Level.load(args.level, args.visit)
-    level.route()
-    print("".join(map(str, level.solution)))
+    main(args.level, args.visit, args.output)

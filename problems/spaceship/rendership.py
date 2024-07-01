@@ -120,13 +120,9 @@ def main(filename, solution=None):
     level.save_svg('output.svg')
 
 
-for i in range(1,30):
-    try:
-        Level.load(i).save_svg(f'level{i}.svg')
-    except Exception as e:
-        print(f"Error processing level {i}: {e}")
-# %%
-
 if __name__ == '__main__':
-    import sys
-    main(*sys.argv[1:])
+    for i in range(1,30):
+        try:
+            Level.load(i).save_svg(f'level{i}.svg')
+        except Exception as e:
+            print(f"Error processing level {i}: {e}")

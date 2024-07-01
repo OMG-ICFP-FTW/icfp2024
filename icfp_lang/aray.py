@@ -71,20 +71,20 @@ def request(s, force=False, nocode=False):
 # with open('../problems/index/index.txt', 'w') as file:
 #     file.write(result['decoded'])
 
-# %%  Get lambdaman info and send solutions
-lm_cache_path = '../problems/lambdaman/'
-os.makedirs(lm_cache_path, exist_ok=True)
-result = request('get lambdaman', force=True)
-with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
-    file.write(result['decoded'])
-for i in range(1, 22):
-    path = f'../problems/lambdaman/solution{i}.txt'
-    if os.path.exists(path):
-        with open(path, 'r') as file:
-            solution = file.read().strip()
-    msg = f"solve lambdaman{i} {solution}"
-    result = request(msg)
-    print(result['decoded'])
+# # %%  Get lambdaman info and send solutions
+# lm_cache_path = '../problems/lambdaman/'
+# os.makedirs(lm_cache_path, exist_ok=True)
+# result = request('get lambdaman', force=True)
+# with open(os.path.join(lm_cache_path, 'info.txt'), 'w') as file:
+#     file.write(result['decoded'])
+# for i in range(1, 22):
+#     path = f'../problems/lambdaman/solution{i}.txt'
+#     if os.path.exists(path):
+#         with open(path, 'r') as file:
+#             solution = file.read().strip()
+#     msg = f"solve lambdaman{i} {solution}"
+#     result = request(msg)
+#     print(result['decoded'])
 
 # # %%
 # for i in [6]:
@@ -96,7 +96,7 @@ for i in range(1, 22):
 #     result = request(solution, nocode=True)
 #     print(result['decoded'])
 
-# # # %% Get spaceship info
+# # %% Get spaceship info
 # ss_cache_path = '../problems/spaceship/'
 # os.makedirs(ss_cache_path, exist_ok=True)
 # result = request('get spaceship', force=True)
@@ -110,15 +110,15 @@ for i in range(1, 22):
 #         result = request(msg)
 #         with open(path, 'w') as file:
 #             file.write(result['decoded'])
-# # %% Upload spaceship solutions
-# for i in range(1, 22):
-#     path = f'../problems/spaceship/solution{i}.txt'
-#     if os.path.exists(path):
-#         with open(path, 'r') as file:
-#             solution = file.read().strip()
-#         msg = f"solve spaceship{i} {solution}"
-#         result = request(msg)
-#         print(result['decoded'])
+# %% Upload spaceship solutions
+for i in range(1, 30):
+    path = f'../problems/spaceship/solution{i}.txt'
+    if os.path.exists(path):
+        with open(path, 'r') as file:
+            solution = file.read().strip()
+        msg = f"solve spaceship{i} {solution}"
+        result = request(msg)
+        print(result['decoded'])
 
 # # %% get 3d info
 # result = request('get 3d', force=True)
