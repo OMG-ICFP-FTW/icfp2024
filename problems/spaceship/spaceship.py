@@ -145,12 +145,12 @@ class Level:
                 numera = len(list(self.remaining))
                 denome = len(self.points)
                 frac = numera / denome
-                eff = (denome - numera) / len(self.solution)
+                eff = (denome - numera) / (len(self.solution) + 1)
                 print(f"TICK: Score: {self.score} Top speed: {self.top_speed} Frac: {frac:0.2f} ({numera}/{denome}) Eff: {eff:0.2f}")
                 tick = time.time()
-                with open('/tmp/partial', 'w') as f:
-                    f.write("".join(map(str, self.solution)))
-                print("Partial solution saved to /tmp/partial")
+                # with open('/tmp/partial', 'w') as f:
+                #     f.write("".join(map(str, self.solution)))
+                # print("Partial solution saved to /tmp/partial")
             if time.time() > start + timeout:
                 print("Timeout")
                 exit(1)
