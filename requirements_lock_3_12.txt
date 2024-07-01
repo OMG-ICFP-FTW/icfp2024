@@ -124,6 +124,10 @@ jedi==0.19.1 \
     --hash=sha256:cf0496f3651bc65d7174ac1b7d043eff454892c708a87d1b683e57b569927ffd \
     --hash=sha256:e983c654fe5c02867aef4cdfce5a2fbb4a50adc0af145f70504238f18ef5e7e0
     # via ipython
+joblib==1.4.2 \
+    --hash=sha256:06d478d5674cbc267e7496a410ee875abd68e4340feff4490bcb7afb88060ae6 \
+    --hash=sha256:2382c5816b2636fbd20a09e0f4e9dad4736765fdfb7dca582943b9c1366b3f0e
+    # via scikit-learn
 matplotlib-inline==0.1.7 \
     --hash=sha256:8423b23ec666be3d16e16b60bdd8ac4e86e840ebd1dd11a30b9f117f2fa0ab90 \
     --hash=sha256:df192d39a4ff8f21b1895d72e6a13f5fcc5099f00fa84384e0ea28c2cc0653ca
@@ -176,6 +180,7 @@ numpy==2.0.0 ; python_version >= "3.8" \
     --hash=sha256:feff59f27338135776f6d4e2ec7aeeac5d5f7a08a83e80869121ef8164b74af9
     # via
     #   -r requirements.txt
+    #   scikit-learn
     #   scipy
 parso==0.8.4 \
     --hash=sha256:a418670a20291dacd2dddc80c377c5c3791378ee1e8d12bffc35420643d43f18 \
@@ -205,6 +210,29 @@ requests==2.32.3 ; python_version >= "3.8" \
     --hash=sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760 \
     --hash=sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6
     # via -r requirements.txt
+scikit-learn==1.5.0 \
+    --hash=sha256:057b991ac64b3e75c9c04b5f9395eaf19a6179244c089afdebaad98264bff37c \
+    --hash=sha256:118a8d229a41158c9f90093e46b3737120a165181a1b58c03461447aa4657415 \
+    --hash=sha256:12e40ac48555e6b551f0a0a5743cc94cc5a765c9513fe708e01f0aa001da2801 \
+    --hash=sha256:174beb56e3e881c90424e21f576fa69c4ffcf5174632a79ab4461c4c960315ac \
+    --hash=sha256:1b94d6440603752b27842eda97f6395f570941857456c606eb1d638efdb38184 \
+    --hash=sha256:1f77547165c00625551e5c250cefa3f03f2fc92c5e18668abd90bfc4be2e0bff \
+    --hash=sha256:261fe334ca48f09ed64b8fae13f9b46cc43ac5f580c4a605cbb0a517456c8f71 \
+    --hash=sha256:2a65af2d8a6cce4e163a7951a4cfbfa7fceb2d5c013a4b593686c7f16445cf9d \
+    --hash=sha256:2c75ea812cd83b1385bbfa94ae971f0d80adb338a9523f6bbcb5e0b0381151d4 \
+    --hash=sha256:40fb7d4a9a2db07e6e0cae4dc7bdbb8fada17043bac24104d8165e10e4cff1a2 \
+    --hash=sha256:460806030c666addee1f074788b3978329a5bfdc9b7d63e7aad3f6d45c67a210 \
+    --hash=sha256:47132440050b1c5beb95f8ba0b2402bbd9057ce96ec0ba86f2f445dd4f34df67 \
+    --hash=sha256:4c0c56c3005f2ec1db3787aeaabefa96256580678cec783986836fc64f8ff622 \
+    --hash=sha256:789e3db01c750ed6d496fa2db7d50637857b451e57bcae863bff707c1247bef7 \
+    --hash=sha256:855fc5fa8ed9e4f08291203af3d3e5fbdc4737bd617a371559aaa2088166046e \
+    --hash=sha256:a03b09f9f7f09ffe8c5efffe2e9de1196c696d811be6798ad5eddf323c6f4d40 \
+    --hash=sha256:a3a10e1d9e834e84d05e468ec501a356226338778769317ee0b84043c0d8fb06 \
+    --hash=sha256:a90c5da84829a0b9b4bf00daf62754b2be741e66b5946911f5bdfaa869fcedd6 \
+    --hash=sha256:d82c2e573f0f2f2f0be897e7a31fcf4e73869247738ab8c3ce7245549af58ab8 \
+    --hash=sha256:df8ccabbf583315f13160a4bb06037bde99ea7d8211a69787a6b7c5d4ebb6fc3 \
+    --hash=sha256:f405c4dae288f5f6553b10c4ac9ea7754d5180ec11e296464adb5d6ac68b6ef5
+    # via -r requirements.txt
 scipy==1.14.0 \
     --hash=sha256:076c27284c768b84a45dcf2e914d4000aac537da74236a0d45d82c6fa4b7b3c0 \
     --hash=sha256:07e179dc0205a50721022344fb85074f772eadbda1e1b3eecdc483f8033709b7 \
@@ -231,7 +259,9 @@ scipy==1.14.0 \
     --hash=sha256:c40003d880f39c11c1edbae8144e3813904b10514cd3d3d00c277ae996488cdb \
     --hash=sha256:d91db2c41dd6c20646af280355d41dfa1ec7eead235642178bd57635a3f82209 \
     --hash=sha256:f0a50da861a7ec4573b7c716b2ebdcdf142b66b756a0d392c236ae568b3a93fb
-    # via -r requirements.txt
+    # via
+    #   -r requirements.txt
+    #   scikit-learn
 six==1.16.0 \
     --hash=sha256:1e61c37477a1626458e36f7b1d82aa5c9b094fa4802892072e49de9c60c4c926 \
     --hash=sha256:8abb2f1d86890a2dfb989f9a77cfcfd3e47c2a354b01111771326f8aa26e0254
@@ -244,6 +274,10 @@ tabulate==0.9.0 \
     --hash=sha256:0095b12bf5966de529c0feb1fa08671671b3368eec77d7ef7ab114be2c068b3c \
     --hash=sha256:024ca478df22e9340661486f85298cff5f6dcdba14f3813e8830015b9ed1948f
     # via -r requirements.txt
+threadpoolctl==3.5.0 \
+    --hash=sha256:082433502dd922bf738de0d8bcc4fdcbf0979ff44c42bd40f5af8a282f6fa107 \
+    --hash=sha256:56c1e26c150397e58c4926da8eeee87533b1e32bef131bd4bf6a2f45f3185467
+    # via scikit-learn
 traitlets==5.14.3 \
     --hash=sha256:9ed0579d3502c94b4b3732ac120375cda96f923114522847de4b3bb98b96b6b7 \
     --hash=sha256:b74e89e397b1ed28cc831db7aea759ba6640cb3de13090ca145426688ff1ac4f

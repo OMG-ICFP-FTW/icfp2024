@@ -13,5 +13,6 @@ py_console_script_binary(
         requirement('requests'),
         requirement('numpy'),
         requirement('scipy'),
+        requirement('scikit-learn'),
     ],
 )
