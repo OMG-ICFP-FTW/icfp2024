@@ -13,7 +13,7 @@ def toint(s: str) -> int:
     return value
 
 
-strmap = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&\'()*+,-./:;<=>?@[\\]^_`|~ \n'
+strmap = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`|~ \n"
 
 def decode(s):
     return ''.join(strmap[ord(c) - 33] for c in s)
@@ -59,6 +59,8 @@ def parse(prog) -> Node:
 unary_funcs = {
     'U!': 'not',
     'U-': '-',
+    'U#': 'convert-str-to-int',  # defined in the template
+    'U$': 'convert-int-to-str',  # defined in the template
 }
 
 
@@ -74,7 +76,7 @@ binary_funcs = {
     'B>': '>',
     'B=': 'equal?',
     'B.': 'string-append',
-    'BT': 'take',
+    'BT': 'take',  # defined in the template
     'BD': 'drop',  # defined in the template
     'B$': '',  # Bit of a hack since the first arg will be a function
 }
@@ -113,9 +115,26 @@ def unparse(node) -> str:
 
 
 TEMPLATE = """
+(define (convert-str-to-int str)
+  (foldl
+    (lambda (value char)
+        (+ (* value 94) (- (char->integer char) 33)))
+    0 (string->list str)))
+
+(define (convert-int-to-str num)
+  (define (build-string n acc)
+    (if (zero? n)
+        (list->string acc)
+        (let ((quotient (quotient n 94))
+              (remainder (remainder n 94)))
+          (build-string quotient 
+                        (cons (integer->char (+ remainder 33)) acc)))))
+  (if (zero? num)
+      "!" ; Special case for 0, which corresponds to '!'
+      (build-string num '())))
 
 (define take (lambda (x y) (substring x 0 (- (string-length x) y))))
-(define drop (lambda (x y) (substring x y (string-length x)))
+(define drop (lambda (x y) (substring x y (string-length x))))
 
 (display
 {scm}
