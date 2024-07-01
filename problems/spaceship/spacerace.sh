@@ -6,13 +6,15 @@
 
 timeout=1000
 
-for max_speed in {1..5}
+levels="12 13 23 24 25"
+
+for max_speed in {5..10}
 do
     echo "speed set to $max_speed"
-    for i in {12..13}
+    for i in $levels
     do
         echo "level $i speed $max_speed timeout $timeout"
-        for choices in {1..10}
+        for choices in {1..1}
         do
             ./spaceship.py -l level${i}.txt -o solution${i}.txt -m $max_speed -t $timeout -c $choices
         done
