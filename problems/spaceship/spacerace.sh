@@ -6,10 +6,10 @@
 
 timeout=15
 
-for i in {1..25}
+for i in {5..9}
 do
     echo "Solving level $i"
-    for max_speed in {50..50}
+    for max_speed in {1..50}
     do
         ./spaceship.py -l level${i}.txt -o solution${i}.txt -m $max_speed -t $timeout
     done

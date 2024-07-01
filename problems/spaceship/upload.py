@@ -27,7 +27,7 @@ def request(s):
     return response.text
 
 
-for i in range(1, 26):
+for i in range(5, 26):
     print(f"level{i}")
     with open(f"solution{i}.txt") as f:
         solution = f.read()
