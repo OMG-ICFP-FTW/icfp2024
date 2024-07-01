@@ -124,17 +124,17 @@ class Level:
             self.move(move)
         raise ValueError("Could not navigate to destination")
 
-    def next_point(self):
+    def next_point(self, choices=3):
         remaining = list(self.remaining)
         # sort by distance to self.next
         remaining.sort(key=lambda p: abs(p[0] - self.next[0]) + abs(p[1] - self.next[1]))
         # pick the closest for now
-        return random.choice(remaining[:3])
+        return random.choice(remaining[:choices])
 
-    def route(self, timeout=10, current_best=None):
+    def route(self, timeout=10, current_best=None, choices=3):
         start = time.time()
         while not self.done:
-            p = self.next_point()
+            p = self.next_point(choices)
             self.nav(p)
             if time.time() > start + timeout:
                 print("Timeout")
@@ -145,10 +145,10 @@ class Level:
                     exit(1)
 
 
-def main(filename, visit=None, output=None, max_speed=50, timeout=10, current_best=None):
+def main(filename, visit=None, output=None, max_speed=50, timeout=10, current_best=None, choices=3):
     level = Level.load(filename, visit)
     level.max_speed = max_speed
-    level.route(timeout=timeout, current_best=current_best)
+    level.route(timeout=timeout, current_best=current_best, choices=choices)
     print("Top speed:", level.top_speed, "max speed:", level.max_speed, "solution length:", len(level.solution))
 
     if output:
@@ -175,10 +175,11 @@ if __name__ == '__main__':
     parser.add_argument('-o','--output', default=None, help='Output file')
     parser.add_argument('-m','--max-speed', default=50, type=int, help='Max speed')
     parser.add_argument('-t','--timeout', default=10, type=int, help='Timeout')
+    parser.add_argument('-c','--choices', default=3, type=int, help='Number of choices to consider')
     args = parser.parse_args()
     if os.path.exists(args.output):
         with open(args.output) as f:
             score = len(f.read().strip())
     else:
         score = None
-    main(args.level, args.visit, args.output, args.max_speed, args.timeout, current_best=score)
+    main(args.level, args.visit, args.output, args.max_speed, args.timeout, current_best=score, choices=args.choices)
