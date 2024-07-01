@@ -2,7 +2,7 @@
 # %%
 import requests
 import time
-
+import sys
 
 post_addr = "https://boundvariable.space/communicate"
 # Authorization header
@@ -27,10 +27,11 @@ def request(s):
     return response.text
 
 
-for i in range(5, 26):
-    print(f"level{i}")
-    with open(f"solution{i}.txt") as f:
-        solution = f.read()
-    response = request(f"solve spaceship{i} {solution}")
-    print(response[1:].translate(decode_trans))
-    time.sleep(5)
+if __name__ == '__main__':
+    for i in sys.argv[1:]:
+        print(f"level{i}")
+        with open(f"solution{i}.txt") as f:
+            solution = f.read()
+        response = request(f"solve spaceship{i} {solution}")
+        print(response[1:].translate(decode_trans))
+        time.sleep(5)
