@@ -6,7 +6,6 @@ from dataclasses import dataclass, field
 
 @dataclass
 class Level:
-    i: int
     stars: list
     path: list = field(default_factory=list)
     solution: str = ''
@@ -23,14 +22,18 @@ class Level:
     @classmethod
     def load(cls, i):
         filename = f"level{i}.txt"
+        solution = f"solution{i}.txt"
+        return cls.from_files(filename, solution)
+
+    @classmethod
+    def from_files(cls, filename, solution=None):
         points = []
         with open(filename) as f:
             for line in f.read().strip().splitlines():
                 x, y = map(int, line.split())
                 points.append((x, y))
-        level = cls(i, points)
-        solution = f"solution{i}.txt"
-        if os.path.exists(solution):
+        level = cls(points)
+        if solution and os.path.exists(solution):
             with open(solution) as f:
                 level.walk(f.read().strip())
         return level
@@ -112,10 +115,11 @@ class Level:
         print(f"SVG saved to {filename}")
 
 
-for i in range(30):
-    try:
-        print(f"level {i}")
-        level = Level.load(i)
-        level.save_svg(f"level{i}.svg")
-    except Exception as e:
-        print(e)
+def main(filename, solution=None):
+    level = Level.from_files(filename, solution)
+    level.save_svg('output.svg')
+
+
+if __name__ == '__main__':
+    import sys
+    main(*sys.argv[1:])
