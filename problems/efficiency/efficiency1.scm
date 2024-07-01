@@ -1,0 +1,1 @@
+(display ((lambda (v0) (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 (v0 1))))))))))))))))))))))) (lambda (v0) (+ (+ v0 v0) (+ v0 v0)))))

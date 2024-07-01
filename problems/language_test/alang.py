@@ -1,111 +1,18 @@
 #!/usr/bin/env python
 #%%
-
-r'''
-
-ICFP language
-
-An Interstellar Communication Functional Program (ICFP) consists of a list of space-separated tokens. A token consists of one or more printable ASCII characters, from ASCII code 33 ('!') up to and including code 126 ('~'). In other words, there are 94 possible characters, and a token is a nonempty sequence of such characters.
-
-The first character of a token is called the indicator, and determines the type of the token. The (possibly empty) remainder of the token is called body. The different token types are explained in the next subsections.
-Booleans
-
-indicator = T and an empty body represents the constant true, and indicator = F and an empty body represents the constant false.
-Integers
-
-indicator = I, requires a non-empty body.
-
-The body is interpreted as a base-94 number, e.g. the digits are the 94 printable ASCII characters with the exclamation mark representing 0, double quotes 1, etc. For example, I/6 represent the number 1337.
-Strings
-
-indicator = S
-
-The Cult of the Bound variable seems to use a system similar to ASCII to encode characters, but ordered slightly differently. Specifically, ASCII codes 33 to 126 from the body can be translated to human readable text by converting them according to the following order:
-
-abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!"#$%&'()*+,-./:;<=>?@[\]^_`|~<space><newline>
-
-Here <space> denotes a single space character, and <newline> a single newline character. For example, SB%,,/}Q/2,$_ represents the string "Hello World!".
-Unary operators
-
-indicator = U, requires a body of exactly 1 character long, and should be followed by an ICFP which can be parsed from the tokens following it.
-Character	Meaning	Example
--	Integer negation	U- I$ -> -3
-!	Boolean not	U! T -> false
-#	string-to-int: interpret a string as a base-94 number	U# S4%34 -> 15818151
-$	int-to-string: inverse of the above	U$ I4%34 -> test
-
-The -> symbol in this table should be read as "will evaluate to", see Evaluation.
-Binary operators
-
-indicator = B, requires a body of exactly 1 character long, and should be followed by two ICFPs (let's call them x and y).
-Character	Meaning	Example
-+	Integer addition	B+ I# I$ -> 5
--	Integer subtraction	B- I$ I# -> 1
-*	Integer multiplication	B* I$ I# -> 6
-/	Integer division (truncated towards zero)	B/ U- I( I# -> -3
-%	Integer modulo	B% U- I( I# -> -1
-<	Integer comparison	B< I$ I# -> false
->	Integer comparison	B> I$ I# -> true
-=	Equality comparison, works for int, bool and string	B= I$ I# -> false
-|	Boolean or	B| T F -> true
-&	Boolean and	B& T F -> false
-.	String concatenation	B. S4% S34 -> "test"
-T	Take first x chars of string y	BT I$ S4%34 -> "tes"
-D	Drop first x chars of string y	BD I$ S4%34 -> "t"
-$	Apply term x to y (see Lambda abstractions)	
-If
-
-indicator = ? with an empty body, followed by three ICFPs: the first should evaluate to a boolean, if it's true then the second is evaluated for the result, else the third. For example:
-
-? B> I# I$ S9%3 S./
-
-evaluates to no.
-Lambda abstractions
-
-indicator = L is a lambda abstraction, where the body should be interpreted as a base-94 number in the same way as integers, which is the variable number, and it takes one ICFP as argument. indicator = v is a variable, with again a body being the base-94 variable number.
-
-When the first argument of the binary application operator $ evaluates to a lambda abstraction, the second argument of the application is assigned to that variable. For example, the ICFP
-
-B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK
-
-represents the program (e.g. in Haskell-style)
-
-((\v2 -> \v3 -> v2) ("Hello" . " World!")) 42
-
-which would evaluate to the string "Hello World!".
-Evaluation
-
-The most prevalent ICFP messaging software, Macroware Insight, evaluates ICFP messages using a call-by-name strategy. This means that the binary application operator is non-strict; the second argument is substituted in the place of the binding variable (using capture-avoiding substitution). If an argument is not used in the body of the lambda abstraction, such as v3 in the above example, it is never evaluated. When a variable is used several times, the expression is evaluated multiple times.
-
-For example, evaluation would take the following steps:
-
-B$ L# B$ L" B+ v" v" B* I$ I# v8
-B$ L" B+ v" v" B* I$ I#
-B+ B* I$ I# B* I$ I#
-B+ I' B* I$ I#
-B+ I' I'
-I-
-
-Limits
-
-As communication with Earth is complicated, the Cult seems to have put some restrictions on their Macroware Insight software. Specifically, message processing is aborted when exceeding 10_000_000 beta reductions. Built-in operators are strict (except for B$, of course) and do not count towards the limit of beta reductions. Contestants' messages therefore must stay within these limits.
-
-For example, the following term, which evaluates to 16, uses 109 beta reductions during evaluation:
-
-B$ B$ L" B$ L# B$ v" B$ v# v# L# B$ v" B$ v# v# L" L# ? B= v# I! I" B$ L$ B+ B$ v" v$ B$ v" v$ B- v# I" I%
-
-Researchers expect that the limit on the amount beta reductions is the only limit that contestants may run into, but there seem to also be some (unknown) limits on memory usage and total runtime.
-Unknown operators
-
-The above set of language constructs are all that researchers have discovered, and it is conjectured that the Cult will never use anything else in their communication towards Earth. However, it is unknown whether more language constructs exist.
-'''
-
+from collections import defaultdict
+from typing import List, Tuple, Union, Any, Optional, Dict
+from dataclasses import dataclass, field
 import math
 
 
-test_path = 'language_test.txt'
-with open(test_path, 'r') as file:
-    language_test = file.read()
+
+def truncdiv(a, b):
+    return math.trunc(a / b)
+
+
+def truncmod(a, b):
+    return a - b * truncdiv(a, b)
 
 
 def c2b94(s):
@@ -117,14 +24,14 @@ def c2b94(s):
 
 
 def b942c(value):
+    assert isinstance(value, int) and value >= 0, value
+    if value == 0:
+        return '!'
     s = ""
     while value:
         value, r = divmod(value, 94)
         s = chr(r + 33) + s
     return s
-
-assert c2b94("/6") == 1337
-assert b942c(1337) == "/6"
 
 
 str_reference = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`|~ \n"
@@ -143,170 +50,403 @@ def encode(s):
     return s.translate(encode_trans)
 
 
+@dataclass
+class Node:
+    token: str
+    children: Optional[List['Node']] = None
 
-def evaluate(s):
-    assert isinstance(s, str), f"Expected string, got {type(s)}"
-    assert len(s), f"Expected string of length, got {s}"
-    # get first token
-    parts = s.split(maxsplit=1)
-    token, remainder = parts if len(parts) > 1 else (s, "")
-    indicator, body = token[0], token[1:]
-    if indicator in ["T", "F"]:
-        assert not body, f"Expected empty body, got {body}, {s}"
-        return token == "T", remainder
-    if indicator == "I":
-        assert body, f"Expected non-empty body, got {body}, {s}"
-        return c2b94(body), remainder
-    if indicator == "S":
-        assert body, f"Expected non-empty body, got {body}, {s}"
-        return decode(body), remainder
-    if indicator == "U":
-        assert body, f"Expected one of -!#$, got {body}, {s}"
-        if body == '-':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, int), f"Expected int, got {type(value)}, {s}"
-            return -value, remainder
-        if body == '!':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, bool), f"Expected bool, got {type(value)}, {s}"
-            return not value, remainder
-        if body == '#':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, str), f"Expected str, got {type(value)}, {s}"
-            return c2b94(encode(value)), remainder
-        if body == '$':
-            value, remainder = evaluate(remainder)
-            assert isinstance(value, int), f"Expected int, got {type(value)}, {s}"
-            return decode(b942c(value)), remainder
-    if indicator == "B":
-        assert body, f"Expected non-empty body, got {body}, {s}"
-        op = body
-        value1, remainder = evaluate(remainder)
-        value2, remainder = evaluate(remainder)
-        if op == '+':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 + value2, remainder
-        if op == '-':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 - value2, remainder
-        if op == '*':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 * value2, remainder
-        if op == '/':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return math.trunc(value1 / value2), remainder
-        if op == '%':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            if value1 < 0:
-                value1, value2 = -value1, -value2
-            return value1 % value2, remainder
-        if op == '<':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 < value2, remainder
-        if op == '>':
-            assert isinstance(value1, int) and isinstance(value2, int), f"Expected int, got {type(value1)}, {type(value2)}, {s}"
-            return value1 > value2, remainder
-        if op == '=':
-            assert isinstance(value1, (int, bool, str)) and isinstance(value2, (int, bool, str)), f"Expected int, bool or str, got {type(value1)}, {type(value2)}, {s}"
-            return value1 == value2, remainder
-        if op == '|':
-            assert isinstance(value1, bool) and isinstance(value2, bool), f"Expected bool, got {type(value1)}, {type(value2)}, {s}"
-            return value1 or value2, remainder
-        if op == '&':
-            assert isinstance(value1, bool) and isinstance(value2, bool), f"Expected bool, got {type(value1)}, {type(value2)}, {s}"
-            return value1 and value2, remainder
-        if op == '.':
-            assert isinstance(value1, str) and isinstance(value2, str), f"Expected str, got {type(value1)}, {type(value2)}, {s}"
-            return value1 + value2, remainder
-        if op == 'T':
-            assert isinstance(value1, int) and isinstance(value2, str), f"Expected int, str, got {type(value1)}, {type(value2)}, {s}"
-            return value2[:value1], remainder
-        if op == 'D':
-            assert isinstance(value1, int) and isinstance(value2, str), f"Expected int, str, got {type(value1)}, {type(value2)}, {s}"
-            return value2[value1:], remainder
-        if op == '$':
-            # assert v1 is callable
-            assert isinstance(value1, str) and isinstance(value2, str), f"Expected str, got {type(value1)}, {type(value2)}, {s}"
-            return value1 + value2, remainder
-        raise ValueError(f"Unknown binary operator {op}, {s}")
-    if indicator == '?':
-        assert not body, f"Expected empty body, got {body}, {s}"
-        condition, remainder = evaluate(remainder)
-        first, remainder = evaluate(remainder)
-        second, remainder = evaluate(remainder)
-        print(condition, first, second, remainder)
-        assert isinstance(condition, bool), f"Expected bool, got {type(condition)}, {s}"
-        return (first if condition else second), remainder
-    raise ValueError(f"Unknown indicator {indicator}, {s}")
+    @property
+    def indicator(self) -> str:
+        return self.token[0]
+    
+    @property
+    def body(self) -> str:
+        return self.token[1:]
+    
+    def leaf_eq(self, other: 'Node') -> bool:
+        """ Simple test for leaf equality, false does not imply inequality """
+        if self.indicator in 'TFvIS':
+            return self.token == other.token
+        return False
+    
+    def walk(self):
+        yield self
+        if self.children:
+            for child in self.children:
+                yield from child.walk()
+    
+    def dump(self):
+        return ' '.join(n.token for n in self.walk())
+
+    def copy(self):
+        children = [c.copy() for c in self.children] if self.children else None
+        return Node(self.token, children)
+
+    def rename(self, old, new):
+        if self.token == old:
+            self.token = new
+        elif self.indicator == 'L' and self.body == old[1:]:
+            return
+        if self.children:
+            for c in self.children:
+                c.rename(old, new)
+
+    def match(self, pattern: 'Node') -> Optional[Dict[str, 'Node']]:
+        ''' Return dict of placeholder matches or None '''
+        if pattern.token in 'xyz':  # Placeholders
+            return {pattern.token: self}
+        if len(pattern.token) == 1:
+            if pattern.indicator != self.indicator:
+                return None
+        elif pattern.token != self.token:
+            return None
+        matches = {}
+        for sc, pc in zip(self.children or [], pattern.children or []):
+            match = sc.match(pc)
+            if match is None:
+                return None
+            matches.update(match)
+        return matches
+    
+    def replace(self, pattern: 'Node', matches: Dict[str, 'Node']):
+        """ in-place replacement of node with matched pattern """
+        if pattern.token in 'xyz':  # placeholders
+            node = matches.pop(pattern.token)
+            self.token = node.token
+            self.children = node.children
+            return self
+        # build in place
+        self.token = pattern.token
+        if pattern.children is None:
+            self.children = None
+            return self
+        # build children
+        self.children = []
+        for pc in pattern.children:
+            self.children.append(Node(pc.token).replace(pc, matches))
+        return self
 
 
-assert evaluate("T") == (True, "")
-assert evaluate("F") == (False, "")
-assert evaluate("I/6") == (1337, "")
-assert evaluate("SB%,,/}Q/2,$_") == ("Hello World!", "")
-assert evaluate("U- I$") == (-3, "")
-assert evaluate("U! T") == (False, "")
-assert evaluate("U# S4%34") == (15818151, "")
-assert evaluate("U$ I4%34") == ("test", "")
-assert evaluate("B+ I# I$") == (5, "")
-assert evaluate("B- I$ I#") == (1, "")
-assert evaluate("B* I$ I#") == (6, "")
-assert evaluate("B/ U- I( I#") == (-3, "")
-assert evaluate("B% U- I( I#") == (-1, "")
-assert evaluate("B< I$ I#") == (False, "")
-assert evaluate("B> I$ I#") == (True, "")
-assert evaluate("B= I$ I#") == (False, "")
-assert evaluate("B| T F") == (True, "")
-assert evaluate("B& T F") == (False, "")
-assert evaluate("B. S4% S34") == ("test", "")
-assert evaluate("BT I$ S4%34") == ("tes", "")
-assert evaluate("BD I$ S4%34") == ("t", "")
-assert evaluate("? B> I# I$ S9%3 S./") == ("no", "")
+def parse(prog) -> Node:
+    tokens = prog.strip().split() if isinstance(prog, str) else prog
+    node = Node(tokens.pop(0))
+    if node.indicator in 'TFvISxyz':
+        return node
+    if node.indicator in 'LU':
+        node.children = [parse(tokens)]
+        return node
+    if node.indicator in 'B':
+        node.children = [parse(tokens), parse(tokens)]
+        return node
+    if node.indicator in '?':
+        node.children = [parse(tokens), parse(tokens), parse(tokens)]
+        return node
+    raise ValueError(f"Unknown indicator {node.indicator}, {node.token}")
 
 
-
-'''
-Stepping through by hand, the example:
-
-
-B$ L# B$ L" B+ v" v" B* I$ I# v8
-B$ [L#] [B$ L" B+ v" v" B* I$ I# v8]
+assert parse("I123").match(parse("I")) == {}
+assert parse("I123").match(parse("x")) == {'x': parse("I123")}
 
 
+PATTERNS_TEXT = """
+# Unary operators cancel out
+U! T -> F
+U! F -> T
+U- I! -> I!
+U- U- x -> x
+U! U! x -> x
+U$ U# x -> x
+U# U$ x -> x
 
-B$ L" B+ v" v" B* I$ I#
-B+ B* I$ I# B* I$ I#
-B+ I' B* I$ I#
-B+ I' I'
-I-
+# Boolean operators
+B& T T -> T
+B& T x -> x
+B& x T -> x
+B& F x -> F
+B& x F -> F
+B& U! x U! y -> U! B| x y
+B| T x -> T
+B| x T -> T
+B| F F -> F
+B| F x -> x
+B| x F -> x
+B| U! x U! y -> U! B& x y
+
+# Arithmetic: Reduce and move negation higher
+B+ x I! -> x
+B+ I! x -> x
+B- x I! -> x
+B- I! x -> U- x
+B+ x U- y -> B- x y
+B- x U- y -> B+ x y
+B* I! x -> I!
+B* x I! -> I!
+B* U- x y -> U- B* x y
+B* x U- y -> U- B* x y
+B* U- x U- y -> B* x y
+B/ I! x -> I!
+B/ U- x y -> U- B/ x y
+B/ x U- y -> U- B/ x y
+
+# Comparison - these have to be computed
+B< U- x U- y -> B> x y
+B> U- x U- y -> B< x y
+B= U- x U- y -> B= x y
+
+# Conditional
+? T x y -> x
+? F x y -> y
+"""
+
+@dataclass
+class Rule:
+    pattern: Node
+    replace: Node
+
+    @classmethod
+    def from_line(cls, line: str):
+        left, right = line.split('->')
+        pattern, replace = parse(left), parse(right)
+        return cls(pattern, replace)
+
+    def match(self, node: Node):
+        return node.match(self.pattern)
+    
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        node.replace(self.replace, matches)
+
+    def __str__(self):
+        return f"Rule({self.pattern.dump()} -> {self.replace.dump()})"
 
 
+@dataclass
+class StrToIntRule(Rule):
+    pattern: Node = field(default_factory=lambda: parse('U# S'))
+    replace: Node = field(default_factory=lambda: parse('x'))
+
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        matches['x'] = Node('I' + node.children[0].body)
+        node.replace(self.replace, matches)
 
 
-B$ L# B$ L" B+ v" v" B* I$ I# v8
-B$ L" B+ v" v" B* I$ I#
-B+ B* I$ I# B* I$ I#
-B+ I' B* I$ I#
-B+ I' I'
-I-
+@dataclass
+class IntToStrRule(Rule):
+    pattern: Node = field(default_factory=lambda: parse('U$ I'))
+    replace: Node = field(default_factory=lambda: parse('x'))
+
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        matches['x'] = Node('S' + node.children[0].body)
+        node.replace(self.replace, matches)
 
 
-B(apply) L(2) B(apply) L(1) B(add) v(1) v(1) B(mul) I(3) I(2) v(23)
-B(apply) L(1) B(add) v(1) v(1) B(mul) I(3) I(2)
-B(add) B(mul) I(3) I(2) B(mul) I(3) I(2)
-B(add) I(6) B(mul) I(3) I(2)
-B(add) I(6) I(6)
-I(12)
+@dataclass
+class ArithmeticRule(Rule):
+    replace: Node = field(default_factory=lambda: parse('x'))
+
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        left, right = node.children
+        a, b = c2b94(left.body), c2b94(right.body)
+        c = self.func(a, b)
+        matches['x'] = Node(f"I{b942c(c)}")
+        node.replace(self.replace, matches)
 
 
-B$ B$ L# L$ v# B. SB%,,/ S}Q/2,$_ IK
+@dataclass
+class AdditionRule(ArithmeticRule):
+    pattern: Node = field(default_factory=lambda: parse('B+ I I'))
 
-B(apply) B(apply) L(3) L(2) v(3) B(concat) S(Hello) S(World!) I(42)
-B(apply) [B(apply) L(3) L(2) v(3) B(concat) S(Hello) S(World!) I(42)]
+    def func(self, a, b):
+        return a + b
+    
 
-sub:
-B(apply) L(3) L(2) v(3) B(concat) S(Hello) S(World!) I(42)
-B(apply) [L(3) L(2) v(3) B(concat) S(Hello) S(World!)] I(42)
+@dataclass
+class SubtractionRule(ArithmeticRule):
+    pattern: Node = field(default_factory=lambda: parse('B- I I'))
+
+    def func(self, a, b):
+        return a - b
+    
+
+@dataclass
+class MultiplicationRule(ArithmeticRule):
+    pattern: Node = field(default_factory=lambda: parse('B* I I'))
+
+    def func(self, a, b):
+        return a * b
+    
+
+@dataclass
+class DivisionRule(ArithmeticRule):
+    pattern: Node = field(default_factory=lambda: parse('B/ I I'))
+
+    def func(self, a, b):
+        return truncdiv(a, b)
+    
+
+@dataclass
+class ModulusRule(ArithmeticRule):
+    pattern: Node = field(default_factory=lambda: parse('B% I I'))
+
+    def func(self, a, b):
+        return truncmod(a, b)
 
 
-'''
+@dataclass
+class ComparisonRule(Rule):
+    replace: Node = field(default_factory=lambda: parse('x'))
+
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        left, right = node.children
+        a, b = c2b94(left.body), c2b94(right.body)
+        matches['x'] = Node("T" if self.func(a, b) else "F")
+        node.replace(self.replace, matches)
+
+
+@dataclass
+class LessThanRule(ComparisonRule):
+    pattern: Node = field(default_factory=lambda: parse('B< I I'))
+
+    def func(self, a, b):
+        return a < b
+
+@dataclass
+class GreaterThanRule(ComparisonRule):
+    pattern: Node = field(default_factory=lambda: parse('B> I I'))
+
+    def func(self, a, b):
+        return a > b
+    
+@dataclass
+class EqualsRule(ComparisonRule):
+    pattern: Node = field(default_factory=lambda: parse('B= I I'))
+
+    def func(self, a, b):
+        return a == b
+
+
+@dataclass
+class EquivalenceRule(Rule):
+    pattern: Node = field(default_factory=lambda: parse('B= x y'))
+    replace: Node = field(default_factory=lambda: parse('T'))
+
+    def match(self, node: Node):
+        if self.pattern.token == node.token:
+            left, right = node.children
+            return {} if left.leaf_eq(right) else None
+        return None
+
+
+@dataclass
+class ConcatenationRule(Rule):
+    pattern: Node = field(default_factory=lambda: parse('B. S S'))
+    replace: Node = field(default_factory=lambda: parse('x'))
+
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        matches['x'] = Node('S' + node.children[0].body + node.children[1].body)
+        node.replace(self.replace, matches)
+
+
+@dataclass
+class ApplicationRule(Rule):
+    icfp: 'ICFP' = None
+    pattern: Node = field(default_factory=lambda: parse('B$ L x y'))
+    replace: Node = field(default_factory=lambda: parse('x'))
+
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        old_var = 'v' + node.children[0].body
+        new_var = self.icfp.new_var(matches.pop('y'))
+        matches['x'].rename(old_var, new_var)
+        node.replace(self.replace, matches)
+
+
+@dataclass
+class VariableRule(Rule):
+    icfp: 'ICFP' = None
+    pattern: Node = field(default_factory=lambda: parse('v'))
+    replace: Node = field(default_factory=lambda: parse('x'))
+
+    def match(self, node: Node):
+        return {} if node.token in self.icfp.variables else None
+
+    def apply(self, node: Node, matches: Dict[str, Node]):
+        matches['x'] = self.icfp.variables[node.token].copy()
+        node.replace(self.replace, matches)
+
+
+@dataclass
+class Affordance:
+    node: Node
+    rule: Rule
+    matches: Dict[str, Node]
+
+    def __str__(self):
+        return f"Affordance({self.rule})"
+
+
+@dataclass
+class ICFP:
+    root: Node
+    variables: Dict[int, Node] = field(default_factory=dict)
+    rules: Dict[str, List[Rule]] = field(default_factory=lambda: defaultdict(list))
+
+    def __post_init__(self):
+        if isinstance(self.root, str):
+            self.root = parse(self.root)
+        for line in PATTERNS_TEXT.strip().split('\n'):
+            if line.strip() and not line.strip().startswith('#'):
+                self.add_rule(Rule.from_line(line))
+        self.add_rule(StrToIntRule())
+        self.add_rule(IntToStrRule())
+        self.add_rule(AdditionRule())
+        self.add_rule(SubtractionRule())
+        self.add_rule(MultiplicationRule())
+        self.add_rule(DivisionRule())
+        self.add_rule(ModulusRule())
+        self.add_rule(LessThanRule())
+        self.add_rule(GreaterThanRule())
+        self.add_rule(EqualsRule())
+        self.add_rule(EquivalenceRule())
+        self.add_rule(ConcatenationRule())
+        self.add_rule(ApplicationRule(icfp=self))
+        self.add_rule(VariableRule(icfp=self))
+
+    def add_rule(self, rule: Rule):
+        self.rules[rule.pattern.token].append(rule)
+    
+    def new_var(self, node: Node) -> str:
+        name = f'v{len(self.variables):09d}'
+        self.variables[name] = node
+        return name
+
+    def get_affordances(self):
+        affordances = [] # list of (node, rule, matches) tuple
+        for node in self.root.walk():
+            # Token specific rules and indicator generic rules
+            for rule in self.rules[node.token] + self.rules[node.indicator]:
+                matches = node.match(rule.pattern)
+                if matches is not None:
+                    affordance = Affordance(node, rule, matches)
+                    affordances.append(affordance)
+        return affordances
+    
+    def apply_affordance(self, affordance: Affordance):
+        affordance.rule.apply(affordance.node, affordance.matches)
+
+    def step(self):
+        affordances = self.get_affordances()
+        if not affordances:
+            return False
+        affordance = affordances[0]
+        self.apply_affordance(affordance)
+        return True
+
+    def run(self):
+        while self.step():
+            pass
+        return self.root
+
+
+with open('language_test.txt') as f:
+    language_test = f.read()
+
+decode(ICFP(language_test).run().body)
