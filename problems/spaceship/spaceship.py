@@ -12,7 +12,7 @@ import time
 import random
 
 from dataclasses import dataclass, field
-from typing import List, Tuple
+from typing import List, Tuple, Optional
 
 @dataclass
 class Level:
@@ -22,6 +22,21 @@ class Level:
     solution: list = field(default_factory=list)
     max_speed: int = 300
     top_speed: int = 0
+    visited: set = field(default_factory=set)
+
+    @property
+    def remaining(self):
+        for p in self.points:
+            if p not in self.visited:
+                yield p
+
+    @property
+    def score(self):
+        return len(self.visited)
+
+    @property
+    def done(self):
+        return all(p in self.visited for p in self.points)
 
     @classmethod
     def from_index(cls, i):
@@ -75,6 +90,7 @@ class Level:
         self.top_speed = max(self.top_speed, abs(vx), abs(vy))
         self.vel = (vx, vy)
         self.pos = (self.pos[0] + vx, self.pos[1] + vy)
+        self.visited.add(self.pos)
         self.solution.append(move)
 
     def nav(self, dst, max_tries=100000):
@@ -108,17 +124,31 @@ class Level:
             self.move(move)
         raise ValueError("Could not navigate to destination")
 
-    def route(self, timeout=10):
+    def next_point(self):
+        remaining = list(self.remaining)
+        # sort by distance to self.next
+        remaining.sort(key=lambda p: abs(p[0] - self.next[0]) + abs(p[1] - self.next[1]))
+        # pick the closest for now
+        return random.choice(remaining[:3])
+
+    def route(self, timeout=10, current_best=None):
         start = time.time()
-        for p in self.points:
+        while not self.done:
+            p = self.next_point()
             self.nav(p)
-            assert time.time() < start + timeout, "Timeout"
+            if time.time() > start + timeout:
+                print("Timeout")
+                exit(1)
+            if current_best is not None:
+                if self.score > current_best:
+                    print(f"Current score {self.score} is worse than best {current_best}")
+                    exit(1)
 
 
-def main(filename, visit=None, output=None, max_speed=50, timeout=10):
+def main(filename, visit=None, output=None, max_speed=50, timeout=10, current_best=None):
     level = Level.load(filename, visit)
     level.max_speed = max_speed
-    level.route(timeout=timeout)
+    level.route(timeout=timeout, current_best=current_best)
     print("Top speed:", level.top_speed, "max speed:", level.max_speed, "solution length:", len(level.solution))
 
     if output:
@@ -146,7 +176,9 @@ if __name__ == '__main__':
     parser.add_argument('-m','--max-speed', default=50, type=int, help='Max speed')
     parser.add_argument('-t','--timeout', default=10, type=int, help='Timeout')
     args = parser.parse_args()
-    try:
-        main(args.level, args.visit, args.output, args.max_speed, args.timeout)
-    except Exception as e:
-        print(e)
+    if os.path.exists(args.output):
+        with open(args.output) as f:
+            score = len(f.read().strip())
+    else:
+        score = None
+    main(args.level, args.visit, args.output, args.max_speed, args.timeout, current_best=score)
