@@ -112,10 +112,11 @@ class Level:
             self.nav(p)
 
 
-def main(filename, visit=None, output=None):
+def main(filename, visit=None, output=None, max_speed=50):
     level = Level.load(filename, visit)
+    level.max_speed = max_speed
     level.route()
-    print("".join(map(str, level.solution)))
+    print("Top speed:", level.top_speed, "max speed:", level.max_speed, "solution length:", len(level.solution))
 
     if output:
         # check existing solution
@@ -124,12 +125,14 @@ def main(filename, visit=None, output=None):
             with open(output) as f:
                 score = len(f.read().strip())
             if len(level.solution) >= score:
-                print(f"Existing solution is better: {score}")
+                print(f"Existing solution is better: {score} <= {len(level.solution)}")
                 return
         # Save new solution
         with open(output, 'w') as f:
             f.write("".join(map(str, level.solution)))
             print(f"Saved solution to {output}")
+    else:
+        print("".join(map(str, level.solution)))
 
 
 if __name__ == '__main__':
@@ -137,5 +140,6 @@ if __name__ == '__main__':
     parser.add_argument('-l','--level', help='Source file with grid', required=True)
     parser.add_argument('-v','--visit', default=None, help='Pre-generated visit order file')
     parser.add_argument('-o','--output', default=None, help='Output file')
+    parser.add_argument('-m','--max-speed', default=50, type=int, help='Max speed')
     args = parser.parse_args()
-    main(args.level, args.visit, args.output)
+    main(args.level, args.visit, args.output, args.max_speed)
