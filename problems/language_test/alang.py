@@ -444,9 +444,17 @@ class ICFP:
         while self.step():
             pass
         return self.root
+    
+    def dump(self):
+        return self.root.dump()
 
 
-with open('language_test.txt') as f:
-    language_test = f.read()
-
-decode(ICFP(language_test).run().body)
+# %%
+if __name__ == '__main__':
+    import sys
+    prog = sys.stdin.read()
+    icfp = ICFP(prog)
+    print(icfp.dump())
+    print("Running ICFP")
+    icfp.run()
+    print(icfp.dump())
