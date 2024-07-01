@@ -120,6 +120,11 @@ def main(filename, solution=None):
     level.save_svg('output.svg')
 
 
+# for i in range(1,30):
+    # Level.load(i).save_svg(f'level{i}.svg')
+
+# %%
+
 if __name__ == '__main__':
     import sys
     main(*sys.argv[1:])
