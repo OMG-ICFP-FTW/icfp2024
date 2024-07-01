@@ -133,9 +133,14 @@ class Level:
 
     def route(self, timeout=10, current_best=None, choices=3):
         start = time.time()
+        tick = time.time()
         while not self.done:
             p = self.next_point(choices)
             self.nav(p)
+            if time.time() > tick + 10:
+                frac = len(list(self.remaining)) / len(self.points)
+                print(f"TICK: Score: {self.score} Top speed: {self.top_speed} Frac: {frac:0.2f}")
+                tick = time.time()
             if time.time() > start + timeout:
                 print("Timeout")
                 exit(1)

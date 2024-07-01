@@ -6,9 +6,9 @@
 
 timeout=1000
 
-levels="12 13 23 24 25"
+levels="23 24 25"
 
-for max_speed in {5..10}
+for max_speed in {2..5}
 do
     echo "speed set to $max_speed"
     for i in $levels
