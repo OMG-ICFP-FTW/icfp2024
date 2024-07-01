@@ -1,0 +1,1 @@
+(display (((lambda (v1) ((lambda (v2) (v1 (v2 v2))) (lambda (v2) (v1 (v2 v2))))) (lambda (v3) (lambda (v4) (if (< v4 2) 1 (+ (v3 (- v4 1)) (v3 (- v4 2))))))) 40))
