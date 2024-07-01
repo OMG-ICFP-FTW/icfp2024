@@ -1,10 +1,10 @@
 <svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">
-  <rect x="200" y="200" width="600" height="600" fill="none" stroke="gray" stroke-width="5" />
-  <circle cx="254.5" cy="690.9" r="3" fill="black" />
-  <circle cx="254.5" cy="581.8" r="3" fill="black" />
-  <circle cx="309.1" cy="472.7" r="3" fill="black" />
-  <circle cx="309.1" cy="309.1" r="3" fill="black" />
-  <circle cx="363.6" cy="200.0" r="3" fill="black" />
-  <polyline points="200.0,745.5 254.5,690.9 254.5,581.8 309.1,472.7 309.1,309.1" fill="none" stroke="red" stroke-width="3" stroke-opacity="0.5"/>
-  <circle cx="363.6" cy="200.0" r="50" fill="blue" fill-opacity="0.5"/>
+  <rect x="200" y="200" width="600" height="600" fill="white" stroke="gray" stroke-width="5" />
+  <circle cx="254.5" cy="690.9" r="7" fill="black" />
+  <circle cx="254.5" cy="581.8" r="7" fill="black" />
+  <circle cx="309.1" cy="472.7" r="7" fill="black" />
+  <circle cx="309.1" cy="309.1" r="7" fill="black" />
+  <circle cx="363.6" cy="200.0" r="7" fill="black" />
+  <polyline points="200.0,745.5 254.5,690.9 254.5,581.8 309.1,472.7 309.1,309.1" fill="none" stroke="red" stroke-width="7" stroke-opacity="0.5"/>
+  <circle cx="363.6" cy="200.0" r="15" fill="blue" fill-opacity="0.5"/>
 </svg>

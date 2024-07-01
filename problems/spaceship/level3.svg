@@ -1,15 +1,15 @@
 <svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">
-  <rect x="200" y="200" width="600" height="600" fill="none" stroke="gray" stroke-width="5" />
-  <circle cx="200.0" cy="233.3" r="3" fill="black" />
-  <circle cx="266.7" cy="466.7" r="3" fill="black" />
-  <circle cx="366.7" cy="700.0" r="3" fill="black" />
-  <circle cx="333.3" cy="666.7" r="3" fill="black" />
-  <circle cx="333.3" cy="633.3" r="3" fill="black" />
-  <circle cx="200.0" cy="300.0" r="3" fill="black" />
-  <circle cx="200.0" cy="200.0" r="3" fill="black" />
-  <circle cx="300.0" cy="566.7" r="3" fill="black" />
-  <circle cx="233.3" cy="366.7" r="3" fill="black" />
-  <circle cx="400.0" cy="733.3" r="3" fill="black" />
-  <polyline points="233.3,200.0 200.0,200.0 200.0,233.3 233.3,300.0 266.7,400.0 266.7,466.7 300.0,566.7 333.3,666.7 333.3,733.3 333.3,766.7 333.3,766.7 333.3,733.3 333.3,666.7 333.3,633.3 366.7,633.3 366.7,666.7 366.7,700.0 400.0,733.3 400.0,733.3 366.7,700.0 300.0,633.3 233.3,533.3 200.0,400.0 200.0,300.0 233.3,233.3 233.3,200.0 233.3,200.0 233.3,233.3 233.3,300.0" fill="none" stroke="red" stroke-width="3" stroke-opacity="0.5"/>
-  <circle cx="233.3" cy="366.7" r="50" fill="blue" fill-opacity="0.5"/>
+  <rect x="200" y="200" width="600" height="600" fill="white" stroke="gray" stroke-width="5" />
+  <circle cx="200.0" cy="233.3" r="7" fill="black" />
+  <circle cx="266.7" cy="466.7" r="7" fill="black" />
+  <circle cx="366.7" cy="700.0" r="7" fill="black" />
+  <circle cx="333.3" cy="666.7" r="7" fill="black" />
+  <circle cx="333.3" cy="633.3" r="7" fill="black" />
+  <circle cx="200.0" cy="300.0" r="7" fill="black" />
+  <circle cx="200.0" cy="200.0" r="7" fill="black" />
+  <circle cx="300.0" cy="566.7" r="7" fill="black" />
+  <circle cx="233.3" cy="366.7" r="7" fill="black" />
+  <circle cx="400.0" cy="733.3" r="7" fill="black" />
+  <polyline points="233.3,200.0 200.0,200.0 200.0,233.3 233.3,300.0 266.7,400.0 266.7,466.7 300.0,566.7 333.3,666.7 333.3,733.3 333.3,766.7 333.3,766.7 333.3,733.3 333.3,666.7 333.3,633.3 366.7,633.3 366.7,666.7 366.7,700.0 400.0,733.3 400.0,733.3 366.7,700.0 300.0,633.3 233.3,533.3 200.0,400.0 200.0,300.0 233.3,233.3 233.3,200.0 233.3,200.0 233.3,233.3 233.3,300.0" fill="none" stroke="red" stroke-width="7" stroke-opacity="0.5"/>
+  <circle cx="233.3" cy="366.7" r="15" fill="blue" fill-opacity="0.5"/>
 </svg>

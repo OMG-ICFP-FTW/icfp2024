@@ -89,21 +89,21 @@ class Level:
         svg = '<svg width="1000" height="1000" xmlns="http://www.w3.org/2000/svg">\n'
         
         # Draw a border around the content area
-        svg += '  <rect x="200" y="200" width="600" height="600" fill="none" stroke="gray" stroke-width="5" />\n'
+        svg += '  <rect x="200" y="200" width="600" height="600" fill="white" stroke="gray" stroke-width="5" />\n'
         
         # Draw the stars
         for x, y in self.stars:
             cx, cy = transform(x, y)
-            svg += f'  <circle cx="{cx:.1f}" cy="{cy:.1f}" r="3" fill="black" />\n'
+            svg += f'  <circle cx="{cx:.1f}" cy="{cy:.1f}" r="7" fill="black" />\n'
         
         # Draw the trajectory
         if self.path:
             path_points = " ".join([f"{transform(x, y)[0]:.1f},{transform(x, y)[1]:.1f}" for x, y in self.path])
-            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="3" stroke-opacity="0.5"/>\n'
+            svg += f'  <polyline points="{path_points}" fill="none" stroke="red" stroke-width="7" stroke-opacity="0.5"/>\n'
         
         # Draw the spaceship
         ship_x, ship_y = transform(self.px, self.py)
-        svg += f'  <circle cx="{ship_x:.1f}" cy="{ship_y:.1f}" r="50" fill="blue" fill-opacity="0.5"/>\n'
+        svg += f'  <circle cx="{ship_x:.1f}" cy="{ship_y:.1f}" r="15" fill="blue" fill-opacity="0.5"/>\n'
         
         svg += '</svg>'
         return svg
@@ -120,9 +120,11 @@ def main(filename, solution=None):
     level.save_svg('output.svg')
 
 
-# for i in range(1,30):
-    # Level.load(i).save_svg(f'level{i}.svg')
-
+for i in range(1,30):
+    try:
+        Level.load(i).save_svg(f'level{i}.svg')
+    except Exception as e:
+        print(f"Error processing level {i}: {e}")
 # %%
 
 if __name__ == '__main__':
