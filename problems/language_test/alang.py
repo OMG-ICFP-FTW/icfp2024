@@ -148,6 +148,25 @@ assert parse("I123").match(parse("I")) == {}
 assert parse("I123").match(parse("x")) == {'x': parse("I123")}
 
 
+'''
+heuristics
+
+-- simplification to an atom
+
+-- simplification to a single matched node
+
+-- computation, in rough order of complexity
+
+-- variable substitution
+
+-- application (abstraction)
+
+strategy
+
+-- greedy for now
+'''
+
+
 PATTERNS_TEXT = """
 # Unary operators cancel out
 U! T -> F
@@ -187,6 +206,11 @@ B* U- x U- y -> B* x y
 B/ I! x -> I!
 B/ U- x y -> U- B/ x y
 B/ x U- y -> U- B/ x y
+
+# TODO: string and integer mixtures
+# with addition and concatenation
+
+# TODO: take and drop simplifications
 
 # Comparison - these have to be computed
 B< U- x U- y -> B> x y

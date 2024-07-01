@@ -116,42 +116,25 @@ def unparse(node) -> str:
     raise NotImplementedError(f"Missing {node.token[:9]}")
 
 
-TEMPLATE = """
-(define (convert-str-to-int str)
-  (foldl
-    (lambda (value char)
-        (+ (* value 94) (- (char->integer char) 33)))
-    0 (string->list str)))
-
-(define (convert-int-to-str num)
-  (define (build-string n acc)
-    (if (zero? n)
-        (list->string acc)
-        (let ((quotient (quotient n 94))
-              (remainder (remainder n 94)))
-          (build-string quotient 
-                        (cons (integer->char (+ remainder 33)) acc)))))
-  (if (zero? num)
-      "!" ; Special case for 0, which corresponds to '!'
-      (build-string num '())))
-
-(define take (lambda (x y) (substring x 0 (- (string-length x) y))))
-(define drop (lambda (x y) (substring x y (string-length x))))
-
-(display
-{scm}
-)
-"""
-
 def main(s):
     node = parse(s)
     scm = unparse(node)
-    return TEMPLATE.format(scm=scm)
+    with open('rewrite.scm') as f:
+        header = f.read()
+    program = f"\n(display\n;BEGIN CODE\n{scm}\n;END CODE\n)"
+    return header + program
 
-main(open('language_test.txt').read())
-
-# %%
 
 if __name__ == '__main__':
+    import os
     import sys
-    print(main(sys.stdin.read()))
+    if len(sys.argv) > 1:
+        filepath = sys.argv[1]
+        if not os.path.exists(filepath):
+            print("Defaulting to language_test")
+            filepath = 'language_test.txt'
+        with open(filepath) as f:
+            icfp = f.read()
+    else:
+        icfp = sys.stdin.read()
+    print(main(icfp))
