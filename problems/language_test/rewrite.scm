@@ -1,4 +1,4 @@
-
+; rewrite.scm - header for rewrite.py generated scheme
 
 ; take the first x characters of string y
 (define take
@@ -25,7 +25,6 @@
       ; convert string to character list and start at 0
       (lchar-to-int 0 (string->list str)))))
 
-
 ; convert integer to ICFP string
 (define i2s
   (lambda (int)
@@ -44,3 +43,27 @@
                   (cons (integer->char (+ (remainder int 94) 33)) lchar)))))))
           ; convert resulting character list to string
           (list->string (int-to-lchar int '())))))))
+
+; missing in chicken from R7RS
+(define string-map
+  (lambda (f s)
+    (list->string (map f (string->list s)))))
+
+; render a string by decoding
+(define decode
+  (lambda (s)
+    (string-map
+      (lambda (c)
+        (string-ref
+          "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`|~ \n"
+          (- (char->integer c) 33)))
+      s)))
+
+
+; render result optionally
+(define render
+  (lambda (r)
+    (display
+      (cond
+        ((string? r) (decode r))
+        (else r)))))

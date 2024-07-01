@@ -3,28 +3,8 @@
 from collections import defaultdict
 from typing import List, Tuple, Union, Any, Optional, Dict
 from dataclasses import dataclass, field
-
-
-def toint(s: str) -> int:
-    value = 0
-    for c in s:
-        value *= 94
-        value += ord(c) - 33
-    return value
-
-
-strmap = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!\"#$%&'()*+,-./:;<=>?@[\\]^_`|~ \n"
-
-def decode(s):
-    return ''.join(strmap[ord(c) - 33] for c in s)
-
-def encode(s):
-    return ''.join(chr(strmap.index(c) + 33) for c in s)
-
-assert toint('!') == 0
-assert toint('"') == 1
-assert toint('"!') == 94
-assert decode('B%,,/}Q/2,$_') == 'Hello World!'
+import os
+import sys
 
 
 @dataclass
@@ -61,8 +41,8 @@ def parse(prog) -> Node:
 unary_funcs = {
     'U!': 'not',
     'U-': '-',
-    'U#': 'convert-str-to-int',  # defined in the template
-    'U$': 'convert-int-to-str',  # defined in the template
+    'U#': 's2i',  # defined in header
+    'U$': 'i2s',  # defined in header
 }
 
 
@@ -78,10 +58,21 @@ binary_funcs = {
     'B>': '>',
     'B=': 'equal?',
     'B.': 'string-append',
-    'BT': 'take',  # defined in the template
-    'BD': 'drop',  # defined in the template
+    'BT': 'take',  # defined in header
+    'BD': 'drop',  # defined in header
     'B$': '',  # Bit of a hack since the first arg will be a function
 }
+
+
+def varname(body):
+    """ Convert variable tag to a v-prefixed hex name """
+    return 'v' + ''.join(f"{ord(c):2x}" for c in body)
+
+
+def escape(s):
+    """ Return a string escaped for use by scheme """
+    e = s.replace("\\", "\\\\").replace("\"", "\\\"").replace("\n","\\n")
+    return f"\"{e}\""
 
 
 def unparse(node) -> str:
@@ -91,17 +82,15 @@ def unparse(node) -> str:
     if node.indicator == 'F':
         return '#f'
     if node.indicator == 'I':
-        return str(toint(node.body))
+        return f"(s2i {escape(node.body)})"
     if node.indicator == 'S':
-        return '"' + decode(node.body) + '"'
+        return escape(node.body)
     if node.indicator == 'v':
-        return f"v{toint(node.body)}"
+        return varname(node.body)
     if node.indicator in 'UL':
-        child, = node.children
-        c = unparse(child)
+        c = unparse(node.children[0])
         if node.indicator == 'L':
-            v = f"v{toint(node.body)}"
-            return f"(lambda ({v}) {c})"
+            return f"(lambda ({varname(node.body)}) {c})"
         func = unary_funcs[node.token]
         return f"({func} {c})"
     if node.indicator in 'B':
@@ -121,20 +110,29 @@ def main(s):
     scm = unparse(node)
     with open('rewrite.scm') as f:
         header = f.read()
-    program = f"\n(display\n;BEGIN CODE\n{scm}\n;END CODE\n)"
-    return header + program
+    code = f"\n(render\n;BEGIN CODE\n{scm}\n;END CODE\n)"
+    return header + code
+
+
+# def main(s, path='/tmp/main.scm'):
+#     src = trans(s)
+#     with open(path, 'w') as f:
+#         f.write(src)
+#     prog = path + '.out'
+#     os.system(f"csc {path} -o {prog}")
+#     os.system(f"{prog}")
+#     print('Done')
 
 
 if __name__ == '__main__':
-    import os
-    import sys
     if len(sys.argv) > 1:
         filepath = sys.argv[1]
         if not os.path.exists(filepath):
-            print("Defaulting to language_test")
+            print(";Defaulting to language_test")
             filepath = 'language_test.txt'
         with open(filepath) as f:
             icfp = f.read()
     else:
+        print(";Reading from stdin")
         icfp = sys.stdin.read()
     print(main(icfp))
