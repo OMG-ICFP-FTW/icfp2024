@@ -121,7 +121,7 @@ def main(filename, solution=None):
 
 
 if __name__ == '__main__':
-    for i in range(1,30):
+    for i in range(1,26):
         try:
             Level.load(i).save_svg(f'level{i}.svg')
         except Exception as e:

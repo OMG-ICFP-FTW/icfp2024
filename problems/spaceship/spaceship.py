@@ -8,6 +8,7 @@ Moves are represented with a single digit, inspired by the old numeric pad on a 
 
 import argparse
 import os
+import time
 import random
 
 from dataclasses import dataclass, field
@@ -107,15 +108,17 @@ class Level:
             self.move(move)
         raise ValueError("Could not navigate to destination")
 
-    def route(self):
+    def route(self, timeout=10):
+        start = time.time()
         for p in self.points:
             self.nav(p)
+            assert time.time() < start + timeout, "Timeout"
 
 
-def main(filename, visit=None, output=None, max_speed=50):
+def main(filename, visit=None, output=None, max_speed=50, timeout=10):
     level = Level.load(filename, visit)
     level.max_speed = max_speed
-    level.route()
+    level.route(timeout=timeout)
     print("Top speed:", level.top_speed, "max speed:", level.max_speed, "solution length:", len(level.solution))
 
     if output:
@@ -141,5 +144,9 @@ if __name__ == '__main__':
     parser.add_argument('-v','--visit', default=None, help='Pre-generated visit order file')
     parser.add_argument('-o','--output', default=None, help='Output file')
     parser.add_argument('-m','--max-speed', default=50, type=int, help='Max speed')
+    parser.add_argument('-t','--timeout', default=10, type=int, help='Timeout')
     args = parser.parse_args()
-    main(args.level, args.visit, args.output, args.max_speed)
+    try:
+        main(args.level, args.visit, args.output, args.max_speed, args.timeout)
+    except Exception as e:
+        print(e)
