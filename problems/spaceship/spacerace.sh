@@ -4,12 +4,12 @@
 
 # iterate over max_speeds 1 through 50 inclusive
 
-timeout=1
+timeout=10
 
-for max_speed in {1..50}
+for max_speed in {1..5}
 do
     echo "speed set to $max_speed"
-    for i in {15..18}
+    for i in {22..22}
     do
         echo "level $i speed $max_speed timeout $timeout"
         for choices in {1..10}
