@@ -6,42 +6,38 @@ In 2020, most of us have learned how to operate a spaceship. In this course we'l
 Moves are represented with a single digit, inspired by the old numeric pad on a computer keyboard that we used to have in the old days on Earth. For example, `7` means decreasing `vx` and increasing `vy` by `1`, while `6` means increasing `vx` by `1` and keeping `vy` the same. A path can then be represented by a sequence of digits, e.g. the path `236659` visits, in this order, the following squares: `(0,0) (0,-1) (1,-3) (3,-5) (6,-7) (9,-9) (13,-10)`.
 '''
 
-import random
+import argparse
 import os
-from typing import List, Tuple
+import random
+
 from dataclasses import dataclass, field
+from typing import List, Tuple
 
 @dataclass
 class Level:
-    i: int
-    remaining: set
+    points: list
     pos: tuple = (0, 0)
     vel: tuple = (0, 0)
     solution: list = field(default_factory=list)
 
     @classmethod
-    def load(cls, i):
-        points = set()
-        with open(f'level{i}.txt') as file:
-            for line in file.read().strip().splitlines():
+    def load(cls, point_file, order_file):
+        points = list()
+        with open(point_file) as f:
+            for line in f.read().strip().splitlines():
                 x, y = map(int, line.strip().split())
-                points.add((x, y))
-        return cls(i, points)
-    
-    @property
-    def solved(self):
-        return len(self.remaining) == 0
+                points.append((x, y))
+
+        with open(order_file) as f:
+            points = list(points[i] for i in map(int, f.read().strip().split(',')))
+        return cls(points)
 
     @property
-    def score(self):
-        return len(self.solution) if self.solved else None
-
-    @property
-    def nex(self):
+    def next(self):
         return self.pos[0] + self.vel[0], self.pos[1] + self.vel[1]
 
     def move(self, move: int):
-        assert move in range(1, 10), f"Invalid move {move}"
+        assert 0 < move < 10, f"Invalid move {move}"
         vx, vy = self.vel
         if move == 1:
             vx -= 1
@@ -69,8 +65,6 @@ class Level:
             raise ValueError(f"Invalid move {move}")
         self.vel = (vx, vy)
         self.pos = (self.pos[0] + vx, self.pos[1] + vy)
-        if self.pos in self.remaining:
-            self.remaining.remove(self.pos)
         self.solution.append(move)
 
     def nav(self, dst, max_tries=100000):
@@ -78,55 +72,60 @@ class Level:
         for _ in range(max_tries):
             if self.pos == dst:
                 return
-            if self.nex[0] < dst[0]:
-                if self.nex[1] < dst[1]:
+            if self.next[0] < dst[0]:
+                if self.next[1] < dst[1]:
                     self.move(9)
-                elif self.nex[1] > dst[1]:
+                elif self.next[1] > dst[1]:
                     self.move(3)
                 else:
                     self.move(6)
-            elif self.nex[0] > dst[0]:
-                if self.nex[1] < dst[1]:
+            elif self.next[0] > dst[0]:
+                if self.next[1] < dst[1]:
                     self.move(7)
-                elif self.nex[1] > dst[1]:
+                elif self.next[1] > dst[1]:
                     self.move(1)
                 else:
                     self.move(4)
             else:
-                if self.nex[1] < dst[1]:
+                if self.next[1] < dst[1]:
                     self.move(8)
-                elif self.nex[1] > dst[1]:
+                elif self.next[1] > dst[1]:
                     self.move(2)
                 else:
                     self.move(5)
         raise ValueError("Could not navigate to destination")
 
-    def solve(self):
-        while not self.solved:
-            point = random.choice(list(self.remaining))
-            self.nav(point)
-        print(f"Solved level {self.i} in {len(self.solution)} moves")
-        return self
+    def route(self):
+        for p in self.points:
+            self.nav(p)
 
-    def save(self):
-        """ Save level solution if better """
-        assert self.solved and self.score > 0, "Cannot save unsolved level"
-        path = f"./solution{self.i}.txt"
-        if os.path.exists(path):
-            with open(path) as f:
-                prev_score = len(f.read().strip())
-            if self.score >= prev_score:
-                return
-        solution = ''.join(map(str, self.solution))
-        with open(path, 'w') as f:
-            f.write(solution)
-        print(f"Saved solution {self.i}, score", self.score)
+#     def solve(self):
+#         while not self.solved:
+#             point = random.choice(list(self.remaining))
+#             self.nav(point)
+#         print(f"Solved level {self.i} in {len(self.solution)} moves")
+#         return self
 
-# %%
-for _ in range(100):
-    for i in range(1, 22):
-        level = Level.load(i)
-        try:
-            level.solve().save()
-        except ValueError as e:
-            print("Error:", e)
+#     def save(self):
+#         """ Save level solution if better """
+#         assert self.solved and self.score > 0, "Cannot save unsolved level"
+#         path = f"./solution{self.i}.txt"
+#         if os.path.exists(path):
+#             with open(path) as f:
+#                 prev_score = len(f.read().strip())
+#             if self.score >= prev_score:
+#                 return
+#         solution = ''.join(map(str, self.solution))
+#         with open(path, 'w') as f:
+#             f.write(solution)
+#         print(f"Saved solution {self.i}, score", self.score)
+
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Submit 3d solution from file')
+    parser.add_argument('-l','--level', help='Source file with grid', required=True)
+    parser.add_argument('-v','--visit', help='Pre-generated visit order file')
+    args = parser.parse_args()
+
+    level = Level.load(args.level, args.visit)
+    level.route()
+    print("".join(map(str, level.solution)))
